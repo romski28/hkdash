@@ -1,0 +1,79 @@
+HK Observatory Weather Warning Icons Required
+==============================================
+
+IMPORTANT NOTE: Weather icons (temp.png, hum.png, UV.png, rain.png) and 
+pollutant icons have white rounded rectangle backgrounds. Please replace 
+these with transparent background versions for better appearance.
+
+Place all PNG images in the assets/ folder with these exact filenames:
+
+REQUIRED WARNING ICONS:
+-----------------------
+
+1. WFIREY.png / WFIRER.png - Fire Danger Warning (Yellow/Red)
+   Icon: Fire/Flame symbol
+
+2. WTCSIGNAL.png - Typhoon Signal (various levels: 1, 3, 8NE, 8SE, 8SW, 8NW, 9, 10)
+   Icon: Typhoon/Cyclone symbol
+   
+3. WRAINR.png / WRAINA.png / WRAINB.png - Rainstorm Warning (Red/Amber/Black)
+   Icon: Heavy rain/storm cloud
+
+4. WFROST.png - Frost Warning
+   Icon: Snowflake/Frost
+
+5. WCOLD.png - Cold Weather Warning
+   Icon: Thermometer with cold/snowflake
+
+6. WHOT.png - Very Hot Weather Warning
+   Icon: Sun/high temperature
+
+7. WMSGNL.png - Strong Monsoon Signal
+   Icon: Wind symbol
+
+8. WFNTSA.png - Flooding in northern New Territories Special Announcement
+   Icon: Flood/water level
+
+9. WFIRE.png - General Fire Danger (without color suffix)
+   Icon: Fire symbol
+
+10. WTMW.png - Tsunami Warning
+    Icon: Large wave
+
+11. WRAIN.png - General Rainstorm (without color suffix)
+    Icon: Rain cloud
+
+12. WL.png - Landslip Warning
+    Icon: Mountain/landslide
+
+13. WTCPRE8.png - Pre-No. 8 Special Announcement
+    Icon: Typhoon with "8" indicator
+
+Note: Warning codes have color suffixes:
+- Y = Yellow
+- R = Red  
+- A = Amber
+- B = Black
+
+DIMENSIONS:
+-----------
+Recommended size: 32x32 pixels or 64x64 pixels (PNG with transparency)
+
+COLOR SCHEME:
+-------------
+Match HKO official warning colors:
+- Yellow warnings: #fbbf24 background
+- Red warnings: #ef4444 background
+- Amber warnings: #f59e0b background
+- Black warnings: #1f2937 background
+
+SOURCES FOR ICONS:
+------------------
+1. Hong Kong Observatory official website (www.hko.gov.hk)
+2. Create custom icons matching HKO style
+3. Use icon libraries (Font Awesome, Material Icons) and export as PNG
+4. AI image generators with specific prompts
+
+CURRENT ACTIVE WARNING:
+-----------------------
+WFIREY.png - Fire Danger Warning (Yellow) - CREATE THIS ONE FIRST!

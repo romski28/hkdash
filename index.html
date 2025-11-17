@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hong Kong Air & Weather Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="hk-iaq-dashboard" style="max-width: 1400px; margin: 0 auto;">
+<div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: space-between;">
+<div>
+<h1 style="font-size: 24px; font-weight: 800; margin-bottom: 4px; color: #FFFFFF; text-shadow: 0 2px 8px rgba(0, 180, 255, 0.3);">Hong Kong Weather Dashboard</h1>
+<p style="color: rgba(255, 255, 255, 0.9); font-size: 12px; font-weight: 500;">Real-time air quality, weather conditions, and forecasts</p>
+</div>
+<img src="assets/connected-spaces-logo.png" alt="Connected Spaces Online" style="height: 50px; filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));" />
+</div>
+
+  <!--Station selector and share button-->
+  <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); display: flex; gap: 12px; align-items: flex-end;">
+    <div style="flex: 1;">
+      <label style="color: #4b5563; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Select AQHI Station</label>
+      <select id="stationSelect" style="border-radius: 10px; border: 2px solid #e5e7eb; padding: 8px 12px; width: 100%; font-size: 13px; font-weight: 600; color: #1f2937; background: #fff; cursor: pointer; transition: all 0.3s ease; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\"%234b5563\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; padding-right: 32px;">
+        <option>Loading stations...</option>
+      </select>
+    </div>
+    <button id="shareButton" class="share-button" onclick="shareWeather()" title="Share current weather">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.12548 15.0077 5.24917 15.0227 5.37061L8.08259 9.19346C7.54305 8.46916 6.72424 8 5.8 8C4.14315 8 3 9.34315 3 11C3 12.6569 4.14315 14 5.8 14C6.72424 14 7.54305 13.5308 8.08259 12.8065L15.0227 16.6294C15.0077 16.7508 15 16.8745 15 17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17C21 15.3431 19.6569 14 18 14C17.0758 14 16.2569 14.4692 15.7174 15.1935L8.77731 11.3706C8.79229 11.2492 8.8 11.1255 8.8 11C8.8 10.8745 8.79229 10.7508 8.77731 10.6294L15.7174 6.80654C16.2569 7.53084 17.0758 8 18 8Z" fill="currentColor"/>
+      </svg>
+      Share
+    </button>
+  </div>
+
+  <!--Responsive grid-->
+  <div class="dashboard-grid">
+    <!--AQHI and Pollutants block-->
+    <div class="dashboard-card">
+      <div class="card-title" style="display: flex; align-items: center; justify-content: space-between;">
+        <span>AQHI Index</span>
+        <button id="compactToggle" class="compact-toggle" title="Toggle compact view" style="background: none; border: none; padding: 0; margin-left: 8px; cursor: pointer; display: flex; align-items: center;">
+          <span id="compactIcon" style="font-size: 18px;">&#x25B2;</span>
+        </button>
+      </div>
+      <div class="card-main">
+        <div class="card-value" id="aqhiValue">—</div>
+        <div class="risk-pill" id="aqhiRisk">Risk: —</div>
+      </div>
+      <div id="healthAdvice" class="health-advice"></div>
+      <div class="card-updated" id="lastUpdated">Last updated: —</div>
+
+      <!--Pollutants sub-section-->
+      <div id="pollutantSection" style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(229, 231, 235, 0.5);">
+        <div class="card-title" style="margin-top: 0;">Pollutants (µg/m³)</div>
+        <div class="card-grid">
+          <div class="metric"><img alt="NO2" class="iconBig" height="40" src="assets/no2.png" width="40" /><div class="risk-pill" id="no2Pill"><span id="no2Value" width="100%"><center>—</center></span></div></div>
+          <div class="metric"><img alt="O3" class="iconBig" height="40" src="assets/03.png" width="40" /><div class="risk-pill" id="o3Pill"><span id="o3Value">—</span></div></div>
+          <div class="metric"><img alt="SO2" class="iconBig" height="40" src="assets/so2.png" width="40" /><div class="risk-pill" id="so2Pill"><span id="so2Value">—</span></div></div>
+          <div class="metric"><img alt="CO" class="iconBig" height="40" src="assets/co.png" width="40" /><div class="risk-pill" id="coPill"><span id="coValue">—</span></div></div>
+          <div class="metric"><img alt="PM10" class="iconBig" height="40" src="assets/pm10.png" width="40" /><div class="risk-pill" id="pm10Pill"><span id="pm10Value">—</span></div></div>
+          <div class="metric"><img alt="PM2.5" class="iconBig" height="40" src="assets/pm25.png" width="40" /><div class="risk-pill" id="pm25Pill"><span id="pm25Value">—</span></div></div>
+        </div>
+        <div class="card-updated" id="pollutantUpdated">Last updated: —</div>
+      </div>
+    </div>
+
+    <!--Weather and Warnings block-->
+    <div class="dashboard-card">
+      <div class="card-title">Weather</div>
+      <div class="card-grid">
+        <div class="metric">
+          <img alt="Temperature" class="icon clickable-icon" src="assets/temp.png" onclick="showForecast('temperature')" title="Click for 9-day forecast" />
+          <div class="metric">Temperature<br /><div class="risk-pill" id="tempPill"><span id="tempValue">—</span> °C</div></div>
+        </div>
+        <div class="metric">
+          <img alt="Humidity" class="icon clickable-icon" src="assets/hum.png" onclick="showForecast('humidity')" title="Click for 9-day forecast" />
+          <div class="metric">Humidity<div class="risk-pill" id="humPill"><span id="humidityValue">—</span>%</div></div>
+        </div>
+        <div class="metric">
+          <img alt="UV Index" class="icon" src="assets/UV.png" />
+          <div class="metric">UV Index<div class="risk-pill" id="uvPill"><span id="uvValue">—</span></div><span><span id="uvDesc">—</span></span></div>
+        </div>
+        <div class="metric">
+          <img alt="Rainfall" class="icon clickable-icon" src="assets/rain.png" onclick="showForecast('rainfall')" title="Click for 9-day forecast" />
+          <div class="metric">Rain<div class="risk-pill" id="rainPill"><span id="rainValue">—</span> mm</div></div>
+        </div>
+        <div class="metric">
+          <img alt="Wind" class="icon" src="assets/wind.png" onerror="this.style.display='none'" />
+          <div class="metric">Wind
+            <div class="risk-pill" id="windPill">
+              <span id="windSpeedValue">—</span> km/h
+            </div>
+            <div class="wind-row"><span id="windArrowRot" class="wind-rot"><span id="windArrow" class="wind-arrow">▲</span></span><span id="windDirText" class="wind-dir">—</span></div>
+          </div>
+        </div>
+        <div class="metric">
+          <img alt="Visibility" class="icon" src="assets/visibility.png" onerror="this.style.display='none'" />
+          <div class="metric">Visibility
+            <div class="risk-pill" id="visPill"><span id="visibilityValue">—</span> km</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-updated" id="weatherUpdated">Last updated: —</div>
+
+      <!--Warnings sub-section-->
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(229, 231, 235, 0.5);">
+        <div class="card-title" style="margin-top: 0;">Active Warnings</div>
+        <div id="warningsContainer" class="warnings-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Recommendations -->
+  <div class="dashboard-card">
+    <div class="card-title">Is it a good day to...</div>
+    <div id="activityList" class="activity-list">
+      <!-- Filled by script.js -->
+    </div>
+  </div>
+
+  <!-- Additional Data Layers -->
+  <div class="dashboard-card">
+    <div class="card-title">Additional Layers</div>
+    <div class="card-grid">
+      <div class="metric">
+        <img alt="Pollen" class="icon" src="assets/pollen.png" onerror="this.style.display='none'" />
+        <div class="metric">Pollen Index
+          <div class="risk-pill" id="pollenPill"><span id="pollenValue">Dormant</span></div>
+          <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">Returns Mar–Oct</div>
+        </div>
+      </div>
+      <div class="metric">
+        <img alt="Pressure" class="icon" src="assets/pressure.png" onerror="this.style.display='none'" />
+        <div class="metric">Air Pressure
+          <div class="risk-pill" id="pressurePill"><span id="pressureValue">—</span> hPa</div>
+        </div>
+      </div>
+      <div class="metric">
+        <img alt="Beach Quality" class="icon" src="assets/beach.png" onerror="this.style.display='none'" />
+        <div class="metric">Beach Water Quality
+          <div class="risk-pill" id="beachPill"><span id="beachQualityValue">Off-season</span></div>
+          <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">Returns Apr–Oct</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-updated" id="layersUpdated">Air pressure live • Beach/pollen seasonal</div>
+  </div>
+
+  <!--Footer-->
+  <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 12px; margin-top: 12px; text-align: center;">
+    <p style="color: rgba(255, 255, 255, 0.9); font-size: 11px; margin-bottom: 4px; font-weight: 500;">Real-time readings from EPD AQHI, HKO Weather, EPD Pollutants</p>
+    <p style="color: rgba(255, 255, 255, 0.8); font-size: 10px;">🙏 Thanks to Hong Kong EPD &amp; HKO for open data</p>
+  </div>
+</div>
+
+<!-- Forecast Modal -->
+<div id="forecastModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">9-Day Forecast</h3>
+      <span class="modal-close" onclick="closeForecastModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <canvas id="forecastChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/chart-loader.js"></script>
+<script src="script.js" defer></script>
+</body>
+</html>
