@@ -518,6 +518,11 @@ const stationWeatherMap = {
     const s = data.find(d => d.station === stationName);
     if (!s) return;
     
+    // Flush historical values when station changes to avoid misleading trends
+    previousAQHI = null;
+    previousTemp = null;
+    previousPollutants = {};
+    
     const currentAQHI = s.aqhi ?? "—";
     
     // Add trend indicator
@@ -649,11 +654,11 @@ function compassToDeg(dir){
 function updateActivityRecommendations(ctx){
   if (!activityList) return;
   const items = [
-    { key: 'hike', label: 'Go hiking ⛰️', weight: 1 },
-    { key: 'beach', label: 'Go to the beach 🏖️', weight: 1 },
-    { key: 'exercise', label: 'Exercise outdoors 🏃', weight: 1 },
-    { key: 'laundry', label: 'Hang laundry 👕', weight: 1 },
-    { key: 'carwash', label: 'Wash the car 🚗', weight: 1 }
+    { key: 'hike', label: 'Go hiking', icon: 'hiking.png', weight: 1 },
+    { key: 'beach', label: 'Go to the beach', icon: 'gotobeach.png', weight: 1 },
+    { key: 'exercise', label: 'Exercise outdoors', icon: 'exercise.png', weight: 1 },
+    { key: 'laundry', label: 'Hang laundry', icon: 'laundry.png', weight: 1 },
+    { key: 'carwash', label: 'Wash the car', icon: 'carwash.png', weight: 1 }
   ];
 
   function scoreGoodness(){
@@ -699,16 +704,16 @@ function updateActivityRecommendations(ctx){
   }
 
   const decisions = [
-    {label:'Go hiking ⛰️', ...decideHike()},
-    {label:'Go to the beach 🏖️', ...decideBeach()},
-    {label:'Exercise outdoors 🏃', ...decideExercise()},
-    {label:'Hang laundry 👕', ...decideLaundry()},
-    {label:'Wash the car 🚗', ...decideCarwash()},
+    {label:'Go hiking', icon:'hiking.png', ...decideHike()},
+    {label:'Go to the beach', icon:'gotobeach.png', ...decideBeach()},
+    {label:'Exercise outdoors', icon:'exercise.png', ...decideExercise()},
+    {label:'Hang laundry', icon:'laundry.png', ...decideLaundry()},
+    {label:'Wash the car', icon:'carwash.png', ...decideCarwash()},
   ];
 
   activityList.innerHTML = decisions.map(d => `
     <div class="activity-item">
-      <div class="activity-left">${d.label}</div>
+      <div class="activity-left"><img src="assets/${d.icon}" alt="${d.label}" class="activity-icon" /> ${d.label}</div>
       <div>${badge(d.state)}</div>
     </div>
     <div class="activity-reason">${d.reason}</div>
@@ -753,52 +758,40 @@ function updateActivityRecommendations(ctx){
 
       const latest = records[records.length - 1];
       
-      // NO2 - Latest + 24hr avg
+      // NO2 - Latest only
       const no2 = latest.getElementsByTagName("NO2")[0]?.textContent ?? "—";
-      const no2Avg = calculateAverage(records, "NO2");
-      no2Value.innerHTML = no2 + getTrendIndicator(no2, previousPollutants.no2) + 
-        (no2Avg ? `<span class="pollutant-avg" title="24-hour average"> (${no2Avg})</span>` : '');
+      no2Value.innerHTML = no2 + getTrendIndicator(no2, previousPollutants.no2);
       no2Pill.style.backgroundColor = setColour(no2, [40, 90, 120, 230, 340, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
       previousPollutants.no2 = no2;
       
-      // O3 - Latest + 24hr avg
+      // O3 - Latest only
       const o3 = latest.getElementsByTagName("O3")[0]?.textContent ?? "—";
-      const o3Avg = calculateAverage(records, "O3");
-      o3Value.innerHTML = o3 + getTrendIndicator(o3, previousPollutants.o3) +
-        (o3Avg ? `<span class="pollutant-avg" title="24-hour average"> (${o3Avg})</span>` : '');
+      o3Value.innerHTML = o3 + getTrendIndicator(o3, previousPollutants.o3);
       o3Pill.style.backgroundColor = setColour(o3, [50, 100, 130, 240, 380, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
       previousPollutants.o3 = o3;
       
-      // SO2 - Latest + 24hr avg
+      // SO2 - Latest only
       const so2 = latest.getElementsByTagName("SO2")[0]?.textContent ?? "—";
-      const so2Avg = calculateAverage(records, "SO2");
-      so2Value.innerHTML = so2 + getTrendIndicator(so2, previousPollutants.so2) +
-        (so2Avg ? `<span class="pollutant-avg" title="24-hour average"> (${so2Avg})</span>` : '');
+      so2Value.innerHTML = so2 + getTrendIndicator(so2, previousPollutants.so2);
       so2Pill.style.backgroundColor = setColour(so2, [100, 200, 350, 500, 750, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
       previousPollutants.so2 = so2;
       
-      // CO - Latest + 24hr avg
+      // CO - Latest only
       const co = latest.getElementsByTagName("CO")[0]?.textContent ?? "—";
-      const coAvg = calculateAverage(records, "CO");
-      coValue.innerHTML = co + getTrendIndicator(co, previousPollutants.co) +
-        (coAvg ? `<span class="pollutant-avg" title="24-hour average"> (${coAvg})</span>` : '');
+      coValue.innerHTML = co + getTrendIndicator(co, previousPollutants.co);
       if(co != "-")
           coPill.style.backgroundColor = setColour(co, [4000, 20000, 35000, 50000, 75000, 999999999999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
       previousPollutants.co = co;
       
-      // PM10 - Latest + 24hr avg
+      // PM10 - Latest only
       const pm10 = latest.getElementsByTagName("PM10")[0]?.textContent ?? "—";
-      const pm10Avg = calculateAverage(records, "PM10");
-      pm10Value.innerHTML = pm10 + getTrendIndicator(pm10, previousPollutants.pm10) +
-        (pm10Avg ? `<span class="pollutant-avg" title="24-hour average"> (${pm10Avg})</span>` : '');
+      pm10Value.innerHTML = pm10 + getTrendIndicator(pm10, previousPollutants.pm10);
       pm10Pill.style.backgroundColor = setColour(pm10, [20, 40, 50, 100, 150, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
       previousPollutants.pm10 = pm10;
       
-      // PM2.5 - Latest + 24hr avg
+      // PM2.5 - Latest only
       const pm25 = latest.getElementsByTagName("PM2.5")[0]?.textContent ?? "—";
-      const pm25Avg = calculateAverage(records, "PM2.5");
-      pm25Value.innerHTML = pm25 + getTrendIndicator(pm25, previousPollutants.pm25) +
-        (pm25Avg ? `<span class="pollutant-avg" title="24-hour average"> (${pm25Avg})</span>` : '');
+      pm25Value.innerHTML = pm25 + getTrendIndicator(pm25, previousPollutants.pm25);
       pm25Pill.style.backgroundColor = setColour(pm25, [10, 20, 25, 50, 75, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
       previousPollutants.pm25 = pm25;
       
@@ -1087,7 +1080,7 @@ function getTrendIndicator(current, previous) {
   const diff = curr - prev;
   
   if (Math.abs(diff) < 0.1) {
-    return '<span class="trend-indicator trend-neutral">▬</span>';
+    return '<span class="trend-indicator trend-neutral">⇳</span>';
   } else if (diff > 0) {
     return `<span class="trend-indicator trend-up">▲</span>`;
   } else {
