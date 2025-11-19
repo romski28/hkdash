@@ -55,7 +55,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             padding: 20px;
-            padding-bottom: 90px; /* space for bottom bar */
+            padding-bottom: 70px; /* space for footer */
             overflow: hidden;
         }
 
@@ -72,6 +72,68 @@
             justify-content: center;
             z-index: 900;
         }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            z-index: 1000;
+        }
+        
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .footer-citations {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            line-height: 1.4;
+        }
+        
+        .footer-citations a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-citations a:hover {
+            color: #fff;
+        }
+        
+        .footer-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .footer-buttons button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        
+        .footer-buttons button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
         .panel {
             background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%);
@@ -82,6 +144,13 @@
             flex-direction: column;
             overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 100%;
+        }
+        
+        .metrics-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
         .panel h2 {
@@ -176,7 +245,9 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex: 1;
+            min-height: 0;
         }
 
         .metric:last-child {
@@ -404,10 +475,10 @@
 </head>
 <body>
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 24px;">
-            <img src="assets/connected-spaces-logo.png" alt="Connected Spaces" style="height: 40px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);" />
+        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
             <h1>Hong Kong Dashboard</h1>
             <div id="holidayBanner" style="display: none; background: rgba(34, 197, 94, 0.9); color: white; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15);"></div>
+            <div id="warningsContainer" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
         </div>
         <div class="header-buttons">
             <label for="stationSelector" style="color: #fff; font-size: 13px; font-weight: 600; margin-right: 8px;">Station:</label>
@@ -419,72 +490,62 @@
     <div class="main-content">
         <div class="panel">
             <h2>Weather</h2>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/temp.png" alt="Temperature" class="clickable-icon" onclick="openMetricModal('temperature')" style="height:24px;vertical-align:middle;margin-right:6px;">Temperature</span>
-                <span class="metric-value" id="tempValue">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/hum.png" alt="Humidity" class="clickable-icon" onclick="openMetricModal('humidity')" style="height:24px;vertical-align:middle;margin-right:6px;">Humidity</span>
-                <span class="metric-value" id="humidityValue">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/UV.png" alt="UV" class="clickable-icon" onclick="openMetricModal('uv')" style="height:24px;vertical-align:middle;margin-right:6px;">UV Index</span>
-                <span class="metric-value" id="uvValue">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/rain.png" alt="Rain" class="clickable-icon" onclick="openMetricModal('rain')" style="height:24px;vertical-align:middle;margin-right:6px;">Rain</span>
-                <span class="metric-value" id="rainValue">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/wind.png" alt="Wind" class="clickable-icon" onclick="openMetricModal('wind')" style="height:24px;vertical-align:middle;margin-right:6px;">Wind</span>
-                <span class="metric-value" id="windValue">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/visibility.png" alt="Visibility" class="clickable-icon" onclick="openMetricModal('visibility')" style="height:24px;vertical-align:middle;margin-right:6px;">Visibility</span>
-                <span class="metric-value" id="visibilityValue">—</span>
-            </div>
-
-            <div class="warnings-section">
-                <h3>Active Warnings</h3>
-                <div id="warningsContainer"></div>
+            <div class="metrics-container">
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/temp.png" alt="Temperature" class="clickable-icon" onclick="openMetricModal('temperature')" style="height:24px;vertical-align:middle;margin-right:6px;">Temperature</span>
+                    <span class="metric-value" id="tempValue">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/hum.png" alt="Humidity" class="clickable-icon" onclick="openMetricModal('humidity')" style="height:24px;vertical-align:middle;margin-right:6px;">Humidity</span>
+                    <span class="metric-value" id="humidityValue">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/UV.png" alt="UV" class="clickable-icon" onclick="openMetricModal('uv')" style="height:24px;vertical-align:middle;margin-right:6px;">UV Index</span>
+                    <span class="metric-value" id="uvValue">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/rain.png" alt="Rain" class="clickable-icon" onclick="openMetricModal('rain')" style="height:24px;vertical-align:middle;margin-right:6px;">Rain</span>
+                    <span class="metric-value" id="rainValue">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/wind.png" alt="Wind" class="clickable-icon" onclick="openMetricModal('wind')" style="height:24px;vertical-align:middle;margin-right:6px;">Wind</span>
+                    <span class="metric-value" id="windValue">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/visibility.png" alt="Visibility" class="clickable-icon" onclick="openMetricModal('visibility')" style="height:24px;vertical-align:middle;margin-right:6px;">Visibility</span>
+                    <span class="metric-value" id="visibilityValue">—</span>
+                </div>
             </div>
         </div>
 
         <div class="panel">
             <h2>Air Quality (µg/m³)</h2>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/no2.png" alt="NO2" class="clickable-icon" onclick="openMetricModal('no2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
-                <span class="metric-value" id="no2Value">—</span>
+            <div class="metrics-container">
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/no2.png" alt="NO2" class="clickable-icon" onclick="openMetricModal('no2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-value" id="no2Value">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/03.png" alt="O3" class="clickable-icon" onclick="openMetricModal('o3')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-value" id="o3Value">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/so2.png" alt="SO2" class="clickable-icon" onclick="openMetricModal('so2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-value" id="so2Value">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/co.png" alt="CO" class="clickable-icon" onclick="openMetricModal('co')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-value" id="coValue">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/pm10.png" alt="PM10" class="clickable-icon" onclick="openMetricModal('pm10')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-value" id="pm10Value">—</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label"><img src="assets/pm25.png" alt="PM2.5" class="clickable-icon" onclick="openMetricModal('pm25')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-value" id="pm25Value">—</span>
+                </div>
             </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/03.png" alt="O3" class="clickable-icon" onclick="openMetricModal('o3')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
-                <span class="metric-value" id="o3Value">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/so2.png" alt="SO2" class="clickable-icon" onclick="openMetricModal('so2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
-                <span class="metric-value" id="so2Value">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/co.png" alt="CO" class="clickable-icon" onclick="openMetricModal('co')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
-                <span class="metric-value" id="coValue">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/pm10.png" alt="PM10" class="clickable-icon" onclick="openMetricModal('pm10')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
-                <span class="metric-value" id="pm10Value">—</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label"><img src="assets/pm25.png" alt="PM2.5" class="clickable-icon" onclick="openMetricModal('pm25')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
-                <span class="metric-value" id="pm25Value">—</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom toolbar with quick actions -->
-    <div class="bottom-bar">
-        <div class="header-buttons">
-            <button onclick="openModal('traffic')">🚗 Traffic</button>
-            <button onclick="openModal('news')">📰 News</button>
-            <button onclick="openModal('events')">📅 Events</button>
         </div>
     </div>
 
@@ -1555,5 +1616,21 @@
                     checkTodayHoliday();
                 })();
     </script>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-left">
+            <img src="assets/connected-spaces-logo.png" alt="Connected Spaces" style="height: 36px;" />
+            <div class="footer-citations">
+                <div>Data sources: <a href="https://www.hko.gov.hk" target="_blank">Hong Kong Observatory (HKO)</a></div>
+                <div><a href="https://www.aqhi.gov.hk" target="_blank">Hong Kong Environmental Protection Department (EPD)</a></div>
+            </div>
+        </div>
+        <div class="footer-buttons">
+            <button onclick="openModal('traffic')">🚦 Traffic</button>
+            <button onclick="openModal('news')">📰 News</button>
+            <button onclick="openModal('events')">📅 Events</button>
+        </div>
+    </div>
 </body>
 </html>
