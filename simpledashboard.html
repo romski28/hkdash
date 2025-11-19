@@ -471,6 +471,44 @@
             font-size: 14px;
             line-height: 1.6;
         }
+
+        @media (max-width: 700px) {
+            .main-content {
+                grid-template-columns: 1fr !important;
+                padding: 10px;
+                gap: 0;
+            }
+            .panel {
+                margin-bottom: 0;
+                height: auto;
+                min-height: 320px;
+            }
+            .panel-switcher {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 12px;
+                justify-content: center;
+            }
+            .panel-switcher button {
+                flex: 1;
+                background: #374151;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 0;
+                font-size: 16px;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .panel-switcher button.active {
+                background: #667eea;
+                color: #fff;
+            }
+            .panel { display: none; }
+            .panel.active { display: flex; flex-direction: column; }
+        }
     </style>
 </head>
 <body>
@@ -487,8 +525,14 @@
     </div>
     <div id="sd-status" style="display:none; background: rgba(255,255,255,0.15); color:#fff; padding:6px 12px; text-align:center; font-size:12px;"></div>
 
+    <!-- Panel switcher for mobile -->
+    <div class="panel-switcher" id="panelSwitcher" style="display:none;">
+        <button id="weatherBtn" class="active" onclick="showPanel('weather')">Weather</button>
+        <button id="airBtn" onclick="showPanel('air')">Air Quality</button>
+    </div>
+
     <div class="main-content">
-        <div class="panel">
+        <div class="panel active" id="weatherPanel">
             <h2>Weather</h2>
             <div class="metrics-container">
                 <div class="metric">
@@ -518,7 +562,7 @@
             </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="airPanel">
             <h2>Air Quality (µg/m³)</h2>
             <div class="metrics-container">
                 <div class="metric">
@@ -1387,7 +1431,7 @@
 
                     function parseWindDirectionWord(word){
                         if (!word) return null;
-                        const map = { 'NORTH':'N','NORTH-NORTHEAST':'NNE','NORTHEAST':'NE','EAST-NORTHEAST':'ENE','EAST':'E','EAST-SOUTHEAST':'ESE','SOUTHEAST':'SE','SOUTH-SOUTHEAST':'SSE','SOUTH':'S','SOUTH-SOUTHWEST':'SSW','SOUTHWEST':'SW','WEST-SOUTHWEST':'WSW','WEST':'W','WEST-NORTHWEST':'WNW','NORTHWEST':'NW','NORTH-NORTHWEST':'NNW','VARIABLE': null };
+                        const map = { 'NORTH':'N','NORTH-NORTHEAST':'NNE','NORTHEAST':'NE','EAST-NORTHEAST':'ENE','EAST':'E','EAST-SOUTHEAST':'ESE','SOUTHEAST':'SE','SOUTH-SOUTHEAST':'SSW','SOUTH':'S','SOUTH-SOUTHWEST':'SSW','SOUTHWEST':'SW','WEST-SOUTHWEST':'WSW','WEST':'W','WEST-NORTHWEST':'WNW','NORTHWEST':'NW','NORTH-NORTHWEST':'NNW','VARIABLE': null };
                         const key = String(word).toUpperCase().replace(/\s+/g,'-');
                         return map[key] ?? null;
                     }
@@ -1632,5 +1676,40 @@
             <button onclick="openModal('events')">📅 Events</button>
         </div>
     </div>
+
+    <script>
+    // Responsive panel switching for mobile
+    function showPanel(panel) {
+        var weatherPanel = document.getElementById('weatherPanel');
+        var airPanel = document.getElementById('airPanel');
+        var weatherBtn = document.getElementById('weatherBtn');
+        var airBtn = document.getElementById('airBtn');
+        if (panel === 'weather') {
+            weatherPanel.classList.add('active');
+            airPanel.classList.remove('active');
+            weatherBtn.classList.add('active');
+            airBtn.classList.remove('active');
+        } else {
+            weatherPanel.classList.remove('active');
+            airPanel.classList.add('active');
+            weatherBtn.classList.remove('active');
+            airBtn.classList.add('active');
+        }
+    }
+    // Show/hide panel switcher based on screen size
+    function handlePanelSwitcher() {
+        var switcher = document.getElementById('panelSwitcher');
+        if (window.innerWidth <= 700) {
+            switcher.style.display = 'flex';
+            showPanel('weather');
+        } else {
+            switcher.style.display = 'none';
+            document.getElementById('weatherPanel').classList.add('active');
+            document.getElementById('airPanel').classList.add('active');
+        }
+    }
+    window.addEventListener('resize', handlePanelSwitcher);
+    window.addEventListener('DOMContentLoaded', handlePanelSwitcher);
+    </script>
 </body>
 </html>
