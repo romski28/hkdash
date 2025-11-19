@@ -74,17 +74,18 @@
         }
 
         .panel {
-            background: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%);
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .panel h2 {
-            color: #333;
+            color: #e5e7eb;
             margin-bottom: 15px;
             font-size: 20px;
         }
@@ -92,13 +93,13 @@
         .warnings-section {
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 2px solid rgba(229, 231, 235, 0.5);
+            border-top: 2px solid rgba(255, 255, 255, 0.15);
         }
 
         .warnings-section h3 {
             font-size: 14px;
             font-weight: 700;
-            color: #6b7280;
+            color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 10px;
@@ -184,18 +185,32 @@
 
         .metric-label {
             font-size: 14px;
-            color: #666;
+            color: #d1d5db;
         }
 
         .metric-value {
             font-size: 18px;
             font-weight: bold;
-            color: #333;
-            background: #e5e7eb;
-            padding: 6px 12px;
-            border-radius: 8px;
-            min-width: 80px;
+            color: #1f2937;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            min-width: 120px;
+            width: 120px;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 
+                        0 1px 3px rgba(0, 0, 0, 0.08),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .metric-value:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 
+                        0 2px 4px rgba(0, 0, 0, 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
 
         .status-indicator {
@@ -299,6 +314,92 @@
             color: #7f1d1d;
             font-size: 13px;
         }
+
+        .clickable-icon {
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .clickable-icon:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.4));
+        }
+
+        .forecast-chart {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+
+        .chart-bar-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            gap: 8px;
+            padding: 10px;
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        .chart-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bar {
+            width: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .bar:hover {
+            filter: brightness(1.2);
+            transform: scaleY(1.05);
+        }
+
+        .bar-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 4px;
+        }
+
+        .bar-value {
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .metric-description {
+            padding: 16px;
+            background: #eff6ff;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .metric-description h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .metric-description p {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -317,29 +418,29 @@
 
     <div class="main-content">
         <div class="panel">
-            <h2>🌡️ Weather</h2>
+            <h2>Weather</h2>
             <div class="metric">
-                <span class="metric-label"><img src="assets/temp.png" alt="Temperature" style="height:24px;vertical-align:middle;margin-right:6px;">Temperature</span>
+                <span class="metric-label"><img src="assets/temp.png" alt="Temperature" class="clickable-icon" onclick="openMetricModal('temperature')" style="height:24px;vertical-align:middle;margin-right:6px;">Temperature</span>
                 <span class="metric-value" id="tempValue">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/hum.png" alt="Humidity" style="height:24px;vertical-align:middle;margin-right:6px;">Humidity</span>
+                <span class="metric-label"><img src="assets/hum.png" alt="Humidity" class="clickable-icon" onclick="openMetricModal('humidity')" style="height:24px;vertical-align:middle;margin-right:6px;">Humidity</span>
                 <span class="metric-value" id="humidityValue">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/UV.png" alt="UV" style="height:24px;vertical-align:middle;margin-right:6px;">UV Index</span>
+                <span class="metric-label"><img src="assets/UV.png" alt="UV" class="clickable-icon" onclick="openMetricModal('uv')" style="height:24px;vertical-align:middle;margin-right:6px;">UV Index</span>
                 <span class="metric-value" id="uvValue">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/rain.png" alt="Rain" style="height:24px;vertical-align:middle;margin-right:6px;">Rain</span>
+                <span class="metric-label"><img src="assets/rain.png" alt="Rain" class="clickable-icon" onclick="openMetricModal('rain')" style="height:24px;vertical-align:middle;margin-right:6px;">Rain</span>
                 <span class="metric-value" id="rainValue">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/wind.png" alt="Wind" style="height:24px;vertical-align:middle;margin-right:6px;">Wind</span>
+                <span class="metric-label"><img src="assets/wind.png" alt="Wind" class="clickable-icon" onclick="openMetricModal('wind')" style="height:24px;vertical-align:middle;margin-right:6px;">Wind</span>
                 <span class="metric-value" id="windValue">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/visibility.png" alt="Visibility" style="height:24px;vertical-align:middle;margin-right:6px;">Visibility</span>
+                <span class="metric-label"><img src="assets/visibility.png" alt="Visibility" class="clickable-icon" onclick="openMetricModal('visibility')" style="height:24px;vertical-align:middle;margin-right:6px;">Visibility</span>
                 <span class="metric-value" id="visibilityValue">—</span>
             </div>
 
@@ -350,29 +451,29 @@
         </div>
 
         <div class="panel">
-            <h2>💨 Air Quality</h2>
+            <h2>Air Quality (µg/m³)</h2>
             <div class="metric">
-                <span class="metric-label"><img src="assets/no2.png" alt="NO2" style="height:24px;vertical-align:middle;margin-right:6px;">NO₂</span>
+                <span class="metric-label"><img src="assets/no2.png" alt="NO2" class="clickable-icon" onclick="openMetricModal('no2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
                 <span class="metric-value" id="no2Value">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/03.png" alt="O3" style="height:24px;vertical-align:middle;margin-right:6px;">O₃</span>
+                <span class="metric-label"><img src="assets/03.png" alt="O3" class="clickable-icon" onclick="openMetricModal('o3')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
                 <span class="metric-value" id="o3Value">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/so2.png" alt="SO2" style="height:24px;vertical-align:middle;margin-right:6px;">SO₂</span>
+                <span class="metric-label"><img src="assets/so2.png" alt="SO2" class="clickable-icon" onclick="openMetricModal('so2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
                 <span class="metric-value" id="so2Value">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/co.png" alt="CO" style="height:24px;vertical-align:middle;margin-right:6px;">CO</span>
+                <span class="metric-label"><img src="assets/co.png" alt="CO" class="clickable-icon" onclick="openMetricModal('co')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
                 <span class="metric-value" id="coValue">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/pm10.png" alt="PM10" style="height:24px;vertical-align:middle;margin-right:6px;">PM₁₀</span>
+                <span class="metric-label"><img src="assets/pm10.png" alt="PM10" class="clickable-icon" onclick="openMetricModal('pm10')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
                 <span class="metric-value" id="pm10Value">—</span>
             </div>
             <div class="metric">
-                <span class="metric-label"><img src="assets/pm25.png" alt="PM2.5" style="height:24px;vertical-align:middle;margin-right:6px;">PM₂.₅</span>
+                <span class="metric-label"><img src="assets/pm25.png" alt="PM2.5" class="clickable-icon" onclick="openMetricModal('pm25')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
                 <span class="metric-value" id="pm25Value">—</span>
             </div>
         </div>
@@ -392,6 +493,16 @@
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <div id="modal-body">
                 <!-- Modal content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Metric Info Modal -->
+    <div id="metricModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeMetricModal()">&times;</span>
+            <div id="metric-modal-body">
+                <!-- Metric detail content will be loaded here -->
             </div>
         </div>
     </div>
@@ -532,6 +643,342 @@
             document.getElementById('modal').style.display = 'none';
         }
 
+        function closeMetricModal() {
+            document.getElementById('metricModal').style.display = 'none';
+        }
+
+        async function openMetricModal(metricType) {
+            const modal = document.getElementById('metricModal');
+            const modalBody = document.getElementById('metric-modal-body');
+            
+            modal.style.display = 'flex';
+            modalBody.innerHTML = '<div class="loading-spinner">Loading...</div>';
+            
+            try {
+                const content = await loadMetricDetails(metricType);
+                modalBody.innerHTML = content;
+            } catch (err) {
+                console.error('Metric modal error:', err);
+                modalBody.innerHTML = '<div class="error-message">Unable to load metric details.</div>';
+            }
+        }
+
+        async function loadMetricDetails(metricType) {
+            const metricInfo = {
+                temperature: {
+                    title: '🌡️ Temperature',
+                    description: 'Air temperature measured in degrees Celsius. Temperature affects comfort levels and energy consumption. Hong Kong experiences subtropical climate with hot summers and mild winters.',
+                    hasForecast: true,
+                    chartType: 'temperature'
+                },
+                humidity: {
+                    title: '💧 Humidity',
+                    description: 'Relative humidity indicates the amount of moisture in the air. High humidity can make hot weather feel more uncomfortable. Hong Kong typically has high humidity year-round.',
+                    hasForecast: true,
+                    chartType: 'humidity'
+                },
+                uv: {
+                    title: '☀️ UV Index',
+                    description: 'UV Index measures ultraviolet radiation intensity. Higher values indicate greater risk of skin damage. Levels: 0-2 Low, 3-5 Moderate, 6-7 High, 8-10 Very High, 11+ Extreme.',
+                    hasForecast: false
+                },
+                rain: {
+                    title: '🌧️ Rainfall',
+                    description: 'Precipitation measured in millimeters. Shows recent rainfall accumulation. Hong Kong receives most rainfall during the monsoon season (May-September).',
+                    hasForecast: true,
+                    chartType: 'rain'
+                },
+                wind: {
+                    title: '💨 Wind',
+                    description: 'Wind speed and direction. Measured in kilometers per hour. Important for outdoor activities and air quality dispersion. Strong winds can indicate approaching weather systems.',
+                    hasForecast: false
+                },
+                visibility: {
+                    title: '👁️ Visibility',
+                    description: 'Horizontal visibility distance in kilometers. Reduced visibility can be caused by fog, haze, or air pollution. Important for aviation and maritime activities.',
+                    hasForecast: false
+                },
+                no2: {
+                    title: '🏭 Nitrogen Dioxide (NO₂)',
+                    description: 'A reddish-brown gas primarily from vehicle emissions and power plants. Can irritate airways and worsen respiratory conditions. Measured in µg/m³.',
+                    hasForecast: false
+                },
+                o3: {
+                    title: '🌫️ Ozone (O₃)',
+                    description: 'Ground-level ozone forms when pollutants react with sunlight. Can cause breathing difficulties and reduce lung function. Typically higher on hot, sunny days.',
+                    hasForecast: false
+                },
+                so2: {
+                    title: '🏭 Sulfur Dioxide (SO₂)',
+                    description: 'Produced by burning fossil fuels and industrial processes. Can cause respiratory problems and acid rain. Measured in µg/m³.',
+                    hasForecast: false
+                },
+                co: {
+                    title: '🚗 Carbon Monoxide (CO)',
+                    description: 'Colorless, odorless gas from incomplete combustion. Mainly from vehicle exhaust. Reduces oxygen delivery to body tissues.',
+                    hasForecast: false
+                },
+                pm10: {
+                    title: '💨 PM₁₀ Particulate Matter',
+                    description: 'Particles with diameter ≤10 micrometers. Can be inhaled into lungs causing respiratory issues. Sources include dust, pollen, and combustion.',
+                    hasForecast: false
+                },
+                pm25: {
+                    title: '☁️ PM₂.₅ Particulate Matter',
+                    description: 'Fine particles ≤2.5 micrometers. Can penetrate deep into lungs and bloodstream. Major health concern from vehicle emissions and industrial sources.',
+                    hasForecast: false
+                }
+            };
+
+            const info = metricInfo[metricType];
+            if (!info) return '<p>Metric information not available.</p>';
+
+            let html = `<h2>${info.title}</h2>`;
+            html += `<div class="metric-description"><p>${info.description}</p></div>`;
+
+            if (info.hasForecast) {
+                try {
+                    const forecastData = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en');
+                    const forecast = await forecastData.json();
+                    
+                    if (info.chartType === 'temperature') {
+                        html += generateTemperatureChart(forecast.weatherForecast);
+                    } else if (info.chartType === 'rain') {
+                        html += generateRainChart(forecast.weatherForecast);
+                    } else if (info.chartType === 'humidity') {
+                        html += generateHumidityChart(forecast.weatherForecast);
+                    }
+                } catch (err) {
+                    console.error('Forecast fetch failed:', err);
+                    html += '<p style="color:#9ca3af; font-size:13px;">Forecast data unavailable</p>';
+                }
+            }
+
+            return html;
+        }
+
+        function generateTemperatureChart(forecastData) {
+            const days = forecastData.slice(0, 7);
+            
+            // Find actual min and max temperatures in the forecast
+            const allMaxTemps = days.map(d => d.forecastMaxtemp?.value || 0);
+            const allMinTemps = days.map(d => d.forecastMintemp?.value || 0);
+            const actualMax = Math.max(...allMaxTemps);
+            const actualMin = Math.min(...allMinTemps);
+            
+            // Add buffer (20% of range) for better visualization
+            const tempRange = actualMax - actualMin;
+            const buffer = Math.max(tempRange * 0.2, 3); // Minimum 3° buffer
+            const scaleMin = actualMin - buffer;
+            const scaleMax = actualMax + buffer;
+            const scaleRange = scaleMax - scaleMin;
+            
+            let html = '<div class="forecast-chart"><h3 style="margin-bottom:16px; color:#374151;">7-Day Temperature Forecast</h3>';
+            html += '<div style="position:relative; height:250px; padding:10px 10px 70px 45px;">';
+            
+            const chartHeight = 170;
+            
+            // Draw grid lines for reference
+            html += `<div style="position:absolute; bottom:70px; left:45px; right:10px; height:${chartHeight}px; border-bottom:2px solid #d1d5db;">`;
+            for (let i = 0; i <= 4; i++) {
+                const temp = scaleMin + (scaleRange * i / 4);
+                const positionPx = (i / 4) * chartHeight;
+                html += `<div style="position:absolute; bottom:${positionPx}px; left:0; right:0; border-top:1px solid #e5e7eb; height:0;">
+                    <span style="position:absolute; left:-40px; top:-8px; font-size:10px; color:#9ca3af; width:35px; text-align:right;">${Math.round(temp)}°</span>
+                </div>`;
+            }
+            html += '</div>';
+            
+            // Draw bars container
+            html += `<div style="position:absolute; bottom:70px; left:45px; right:10px; height:${chartHeight}px; display:flex; justify-content:space-around; gap:4px;">`;
+            
+            days.forEach(day => {
+                const max = day.forecastMaxtemp?.value || 0;
+                const min = day.forecastMintemp?.value || 0;
+                const dayLabel = day.week.substring(0, 3);
+                const iconCode = day.ForecastIcon || 50;
+                
+                // Calculate positions in pixels for precision
+                const maxHeightPx = ((max - scaleMin) / scaleRange) * chartHeight;
+                const minHeightPx = ((min - scaleMin) / scaleRange) * chartHeight;
+                const barHeightPx = maxHeightPx - minHeightPx;
+                
+                html += `
+                    <div style="flex:1; position:relative; height:${chartHeight}px;">
+                        <div style="position:absolute; bottom:${minHeightPx}px; left:10%; right:10%; height:${barHeightPx}px; background:linear-gradient(180deg, #667eea 0%, #764ba2 100%); border-radius:6px; min-height:4px;">
+                            <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:700; color:#667eea; white-space:nowrap;">${max}°</div>
+                            <div style="position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); font-size:10px; color:#9ca3af; white-space:nowrap;">${min}°</div>
+                        </div>
+                        <div style="position:absolute; bottom:-54px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:2px;">
+                            <img src="assets/HKO/pic${iconCode}.png" alt="Weather" style="width:24px; height:24px; object-fit:contain;" />
+                            <div style="font-size:11px; font-weight:600; color:#374151; white-space:nowrap;">${dayLabel}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            html += `<p style="font-size:11px; color:#9ca3af; margin-top:8px; text-align:center;">Temperature range: ${Math.round(scaleMin)}° - ${Math.round(scaleMax)}°C</p>`;
+            html += '</div>';
+            return html;
+        }
+
+        function generateHumidityChart(forecastData) {
+            const days = forecastData.slice(0, 7);
+            
+            // Find actual min and max humidity in the forecast
+            const allMaxRH = days.map(d => d.forecastMaxrh?.value || 0);
+            const allMinRH = days.map(d => d.forecastMinrh?.value || 0);
+            const actualMax = Math.max(...allMaxRH);
+            const actualMin = Math.min(...allMinRH);
+            
+            // Add buffer (20% of range) for better visualization
+            const rhRange = actualMax - actualMin;
+            const buffer = Math.max(rhRange * 0.2, 5); // Minimum 5% buffer
+            const scaleMin = Math.max(0, actualMin - buffer);
+            const scaleMax = Math.min(100, actualMax + buffer);
+            const scaleRange = scaleMax - scaleMin;
+            
+            let html = '<div class="forecast-chart"><h3 style="margin-bottom:16px; color:#374151;">7-Day Humidity Forecast</h3>';
+            html += '<div style="position:relative; height:250px; padding:10px 10px 70px 45px;">';
+            
+            const chartHeight = 170;
+            
+            // Draw grid lines for reference
+            html += `<div style="position:absolute; bottom:70px; left:45px; right:10px; height:${chartHeight}px; border-bottom:2px solid #d1d5db;">`;
+            for (let i = 0; i <= 4; i++) {
+                const rh = scaleMin + (scaleRange * i / 4);
+                const positionPx = (i / 4) * chartHeight;
+                html += `<div style="position:absolute; bottom:${positionPx}px; left:0; right:0; border-top:1px solid #e5e7eb; height:0;">
+                    <span style="position:absolute; left:-40px; top:-8px; font-size:10px; color:#9ca3af; width:35px; text-align:right;">${Math.round(rh)}%</span>
+                </div>`;
+            }
+            html += '</div>';
+            
+            // Draw bars container
+            html += `<div style="position:absolute; bottom:70px; left:45px; right:10px; height:${chartHeight}px; display:flex; justify-content:space-around; gap:4px;">`;
+            
+            days.forEach(day => {
+                const max = day.forecastMaxrh?.value || 0;
+                const min = day.forecastMinrh?.value || 0;
+                const dayLabel = day.week.substring(0, 3);
+                const iconCode = day.ForecastIcon || 50;
+                
+                // Calculate positions in pixels for precision
+                const maxHeightPx = ((max - scaleMin) / scaleRange) * chartHeight;
+                const minHeightPx = ((min - scaleMin) / scaleRange) * chartHeight;
+                const barHeightPx = maxHeightPx - minHeightPx;
+                
+                html += `
+                    <div style="flex:1; position:relative; height:${chartHeight}px;">
+                        <div style="position:absolute; bottom:${minHeightPx}px; left:10%; right:10%; height:${barHeightPx}px; background:linear-gradient(180deg, #3b82f6 0%, #1e40af 100%); border-radius:6px; min-height:4px;">
+                            <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:700; color:#3b82f6; white-space:nowrap;">${max}%</div>
+                            <div style="position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); font-size:10px; color:#9ca3af; white-space:nowrap;">${min}%</div>
+                        </div>
+                        <div style="position:absolute; bottom:-54px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:2px;">
+                            <img src="assets/HKO/pic${iconCode}.png" alt="Weather" style="width:24px; height:24px; object-fit:contain;" />
+                            <div style="font-size:11px; font-weight:600; color:#374151; white-space:nowrap;">${dayLabel}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            html += `<p style="font-size:11px; color:#9ca3af; margin-top:8px; text-align:center;">Humidity range: ${Math.round(scaleMin)}% - ${Math.round(scaleMax)}%</p>`;
+            html += '</div>';
+            return html;
+        }
+
+        function generateRainChart(forecastData) {
+            const days = forecastData.slice(0, 7);
+            
+            // Map PSR levels to numeric values for dynamic scaling
+            const psrToValue = {
+                'Low': 10,
+                'Medium Low': 25,
+                'Medium': 50,
+                'Medium High': 75,
+                'High': 95
+            };
+            
+            const psrToColor = {
+                'Low': '#10b981',
+                'Medium Low': '#3b82f6',
+                'Medium': '#f59e0b',
+                'Medium High': '#ef4444',
+                'High': '#7c3aed'
+            };
+            
+            const psrToRange = {
+                'Low': '0-5mm',
+                'Medium Low': '5-15mm',
+                'Medium': '15-30mm',
+                'Medium High': '30-50mm',
+                'High': '50mm+'
+            };
+            
+            // Find min and max PSR values in forecast
+            const psrValues = days.map(d => psrToValue[d.PSR || 'Low']);
+            const minValue = Math.min(...psrValues);
+            const maxValue = Math.max(...psrValues);
+            
+            // Add buffer for better visualization
+            const range = maxValue - minValue;
+            const buffer = Math.max(range * 0.15, 10); // At least 10% buffer
+            const scaleMin = Math.max(0, minValue - buffer);
+            const scaleMax = Math.min(100, maxValue + buffer);
+            const scaleRange = scaleMax - scaleMin;
+            
+            let html = '<div class="forecast-chart"><h3 style="margin-bottom:16px; color:#374151;">7-Day Rain Probability & Expected Range</h3>';
+            html += '<div style="position:relative; height:250px; padding:10px 10px 70px 45px;">';
+            
+            const chartHeight = 170;
+            
+            // Draw grid lines
+            html += `<div style="position:absolute; bottom:70px; left:45px; right:10px; height:${chartHeight}px; border-bottom:2px solid #d1d5db;">`;
+            for (let i = 0; i <= 4; i++) {
+                const value = scaleMin + (scaleRange * i / 4);
+                const positionPx = (i / 4) * chartHeight;
+                html += `<div style="position:absolute; bottom:${positionPx}px; left:0; right:0; border-top:1px solid #e5e7eb; height:0;">
+                    <span style="position:absolute; left:-40px; top:-8px; font-size:10px; color:#9ca3af; width:35px; text-align:right;">${Math.round(value)}%</span>
+                </div>`;
+            }
+            html += '</div>';
+            
+            // Draw bars container
+            html += `<div style="position:absolute; bottom:70px; left:45px; right:10px; height:${chartHeight}px; display:flex; justify-content:space-around; gap:4px;">`;
+            
+            days.forEach(day => {
+                const psr = day.PSR || 'Low';
+                const dayLabel = day.week.substring(0, 3);
+                const value = psrToValue[psr];
+                const color = psrToColor[psr];
+                const rainRange = psrToRange[psr];
+                const iconCode = day.ForecastIcon || 50;
+                
+                // Calculate bar height in pixels with proper scaling
+                const barHeightPx = ((value - scaleMin) / scaleRange) * chartHeight;
+                
+                html += `
+                    <div style="flex:1; position:relative; height:${chartHeight}px;">
+                        <div style="position:absolute; bottom:0; left:10%; right:10%; height:${barHeightPx}px; background:linear-gradient(180deg, ${color} 0%, ${color}aa 100%); border-radius:6px 6px 0 0; min-height:4px;">
+                            <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:10px; font-weight:700; color:${color}; white-space:nowrap;">${psr}</div>
+                        </div>
+                        <div style="position:absolute; bottom:-54px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:2px;">
+                            <img src="assets/HKO/pic${iconCode}.png" alt="Weather" style="width:24px; height:24px; object-fit:contain;" />
+                            <div style="font-size:11px; font-weight:600; color:#374151; white-space:nowrap;">${dayLabel}</div>
+                            <div style="font-size:9px; color:#6b7280; font-weight:600;">${rainRange}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            html += '<p style="font-size:11px; color:#9ca3af; margin-top:8px; text-align:center;">* Rainfall ranges are estimates based on probability categories</p>';
+            html += '</div>';
+            return html;
+        }
+
         function toggleTrafficDetail(itemId) {
             const fullDiv = document.getElementById(itemId + '-full');
             const btn = document.getElementById(itemId + '-btn');
@@ -646,11 +1093,16 @@
             }
         }
 
-        // Close modal when clicking outside
+        // Close modals when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('modal');
+            const metricModal = document.getElementById('metricModal');
+            
             if (event.target === modal) {
                 closeModal();
+            }
+            if (event.target === metricModal) {
+                closeMetricModal();
             }
         };
 
