@@ -513,10 +513,9 @@
 </head>
 <body>
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 24px;">
             <h1>Hong Kong Dashboard</h1>
             <div id="holidayBanner" style="display: none; background: rgba(34, 197, 94, 0.9); color: white; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15);"></div>
-            <div id="warningsContainer" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
         </div>
         <div class="header-buttons">
             <label for="stationSelector" style="color: #fff; font-size: 13px; font-weight: 600; margin-right: 8px;">Station:</label>
@@ -533,7 +532,10 @@
 
     <div class="main-content">
         <div class="panel active" id="weatherPanel">
-            <h2>Weather</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Weather</h2>
+                <div id="warningsContainer" style="display: flex; gap: 6px;"></div>
+            </div>
             <div class="metrics-container">
                 <div class="metric">
                     <span class="metric-label"><img src="assets/temp.png" alt="Temperature" class="clickable-icon" onclick="openMetricModal('temperature')" style="height:24px;vertical-align:middle;margin-right:6px;">Temperature</span>
@@ -750,6 +752,25 @@
 
         function closeMetricModal() {
             document.getElementById('metricModal').style.display = 'none';
+        }
+
+        function openWarningModal(warningData) {
+            const modal = document.getElementById('metricModal');
+            const modalBody = document.getElementById('metric-modal-body');
+            
+            modal.style.display = 'flex';
+            
+            let html = `<h2>⚠️ Weather Warning</h2>`;
+            html += `<div class="metric-description">`;
+            html += `<h3>${warningData.name}</h3>`;
+            html += `<p><strong>Issued:</strong> ${warningData.issueTime}</p>`;
+            if (warningData.extra) {
+                html += `<p><strong>Details:</strong> ${warningData.extra}</p>`;
+            }
+            html += `<p style="margin-top: 12px; color: #6b7280; font-size: 13px;">For more information, visit the <a href="https://www.hko.gov.hk" target="_blank" style="color: #667eea;">Hong Kong Observatory website</a>.</p>`;
+            html += `</div>`;
+            
+            modalBody.innerHTML = html;
         }
 
         async function openMetricModal(metricType) {
@@ -1332,7 +1353,7 @@
                                 }));
 
                             if (activeWarnings.length === 0) {
-                                warningsContainer.innerHTML = '<div class="no-warnings">✓ No active weather warnings</div>';
+                                warningsContainer.innerHTML = '';
                             } else {
                                 warningsContainer.innerHTML = activeWarnings.map(warning => {
                                     const warningClass = getWarningClass(warning.code);
@@ -1341,20 +1362,22 @@
                                     let extra = "";
                                     if (warning.code.startsWith("WTCSIGNAL") || warning.code.startsWith("WTYPHOON")) {
                                         if (warning.type) {
-                                            extra = `<div class='warning-level'>Level: ${warning.type}</div>`;
+                                            extra = `Level: ${warning.type}`;
                                         } else if (warning.name && warning.name.match(/No\.\s*\d+/i)) {
-                                            extra = `<div class='warning-level'>${warning.name}</div>`;
+                                            extra = warning.name;
                                         }
                                     }
+                                    const warningData = JSON.stringify({name, issueTime, extra}).replace(/"/g, '&quot;');
                                     return `
-                                        <div class="warning-item ${warningClass}">
-                                            <img src="assets/${warning.code}.png" alt="${name}" class="warning-icon" onerror="this.style.display='none'" />
-                                            <div class="warning-content">
-                                                <div class="warning-title">${name}</div>
-                                                ${extra}
-                                                <div class="warning-time">Issued: ${issueTime}</div>
-                                            </div>
-                                        </div>
+                                        <img src="assets/${warning.code}.png" 
+                                             alt="${name}" 
+                                             class="warning-icon-small ${warningClass}" 
+                                             onclick="openWarningModal(${warningData})"
+                                             title="${name}"
+                                             style="width: 32px; height: 32px; cursor: pointer; border-radius: 4px; transition: transform 0.2s;"
+                                             onmouseover="this.style.transform='scale(1.1)'"
+                                             onmouseout="this.style.transform='scale(1)'"
+                                             onerror="this.style.display='none'" />
                                     `;
                                 }).join("");
                             }
