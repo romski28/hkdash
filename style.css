@@ -102,6 +102,11 @@ body {
     letter-spacing: 0.5px;
     text-transform: uppercase;
   }
+  /* Preserve units casing inside titles (avoid uppercasing µg/m³) */
+  .card-title .unit {
+    text-transform: none;
+    letter-spacing: normal;
+  }
   .card-main {
     display: flex;
     align-items: center;
@@ -521,11 +526,170 @@ body {
 /* Activity recommendations */
 .activity-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
 @media (min-width: 768px) { .activity-list { grid-template-columns: repeat(2, 1fr); } }
-.activity-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.04); border-radius: 10px; padding: 10px 12px; }
-.activity-left { display: flex; align-items: center; gap: 10px; font-weight: 600; color: #111827; }
+.activity-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.04); border-radius: 10px; padding: 10px 12px; gap: 12px; }
+.activity-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .activity-icon { width: 28px; height: 28px; flex-shrink: 0; object-fit: contain; }
-.activity-badge { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 999px; }
+.activity-label { font-weight: 600; color: #111827; }
+.activity-reason { margin-top: 2px; font-size: 11px; color: #6b7280; line-height: 1.3; }
+.activity-badge { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 999px; flex-shrink: 0; }
 .badge-good { background: #dcfce7; color: #166534; }
 .badge-caution { background: #fef9c3; color: #854d0e; }
 .badge-avoid { background: #fee2e2; color: #991b1b; }
-.activity-reason { margin-top: 6px; font-size: 12px; color: #4b5563; }
+
+/* Make pills clickable for info modal */
+.clickable-pill { cursor: pointer; }
+
+/* Help Button */
+.help-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.help-button:hover {
+  background: white;
+  color: #374151;
+  border-color: #00B4FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 180, 255, 0.2);
+}
+
+/* Tutorial Overlay */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.tutorial-overlay.active {
+  pointer-events: auto;
+}
+
+.tutorial-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  animation: fadeIn 0.3s ease;
+}
+
+.tutorial-tooltip {
+  position: absolute;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 320px;
+  z-index: 10000;
+  animation: slideUp 0.3s ease;
+}
+
+.tutorial-tooltip::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+}
+
+.tutorial-tooltip.arrow-top::before {
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-color: white;
+}
+
+.tutorial-tooltip.arrow-bottom::before {
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: white;
+}
+
+.tutorial-tooltip.arrow-left::before {
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: white;
+}
+
+.tutorial-tooltip.arrow-right::before {
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: white;
+}
+
+.tutorial-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.tutorial-content p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.tutorial-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tutorial-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.tutorial-btn-primary {
+  background: linear-gradient(135deg, #00B4FF 0%, #744DFF 100%);
+  color: white;
+}
+
+.tutorial-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 180, 255, 0.4);
+}
+
+.tutorial-btn-secondary {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.tutorial-btn-secondary:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.tutorial-highlight {
+  position: relative;
+  z-index: 9998;
+  box-shadow: 0 0 0 4px rgba(0, 180, 255, 0.5), 0 0 0 99999px rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  pointer-events: auto;
+}

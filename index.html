@@ -31,6 +31,13 @@
       </svg>
       Share
     </button>
+    <button id="helpButton" class="help-button" onclick="startTutorial()" title="Show interactive help">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 
   <!--Responsive grid-->
@@ -38,7 +45,7 @@
     <!--AQHI and Pollutants block-->
     <div class="dashboard-card">
       <div class="card-title" style="display: flex; align-items: center; justify-content: space-between;">
-        <span>AQHI Index</span>
+        <span>Air Quality</span>
         <button id="compactToggle" class="compact-toggle" title="Toggle compact view" style="background: none; border: none; padding: 0; margin-left: 8px; cursor: pointer; display: flex; align-items: center;">
           <span id="compactIcon" style="font-size: 18px;">&#x25B2;</span>
         </button>
@@ -52,7 +59,7 @@
 
       <!--Pollutants sub-section-->
       <div id="pollutantSection" style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(229, 231, 235, 0.5);">
-        <div class="card-title" style="margin-top: 0;">Pollutants (µg/m³)</div>
+  <div class="card-title" style="margin-top: 0;">Pollutants (<span class="unit">µg/m³</span>)</div>
         <div class="card-grid">
           <div class="metric"><img alt="NO2" class="iconBig" height="40" src="assets/no2.png" width="40" /><div class="risk-pill" id="no2Pill"><span id="no2Value" width="100%"><center>—</center></span></div></div>
           <div class="metric"><img alt="O3" class="iconBig" height="40" src="assets/03.png" width="40" /><div class="risk-pill" id="o3Pill"><span id="o3Value">—</span></div></div>
@@ -102,6 +109,9 @@
         </div>
       </div>
       <div class="card-updated" id="weatherUpdated">Last updated: —</div>
+      <div style="font-size: 10px; color: #6b7280; margin-top: 8px; font-style: italic;">
+        ℹ️ Readings from nearest equipped weather stations
+      </div>
 
       <!--Warnings sub-section-->
       <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(229, 231, 235, 0.5);">
@@ -112,7 +122,7 @@
   </div>
 
   <!-- Activity Recommendations -->
-  <div class="dashboard-card">
+  <div class="dashboard-card" style="margin-top: 12px;">
     <div class="card-title">Is it a good day to...</div>
     <div id="activityList" class="activity-list">
       <!-- Filled by script.js -->
@@ -120,7 +130,7 @@
   </div>
 
   <!-- Additional Data Layers -->
-  <div class="dashboard-card">
+  <div class="dashboard-card" style="margin-top: 12px;">
     <div class="card-title">Additional Layers</div>
     <div class="card-grid">
       <div class="metric">
@@ -163,6 +173,34 @@
     </div>
     <div class="modal-body">
       <canvas id="forecastChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal -->
+<div id="infoModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="infoModalTitle">About this reading</h3>
+      <span class="modal-close" id="infoModalClose" aria-label="Close">&times;</span>
+    </div>
+    <div class="modal-body" id="infoModalBody">
+      <!-- populated dynamically -->
+    </div>
+  </div>
+ </div>
+
+<!-- Tutorial Overlay -->
+<div id="tutorialOverlay" class="tutorial-overlay" style="display: none;">
+  <div class="tutorial-backdrop"></div>
+  <div class="tutorial-tooltip" id="tutorialTooltip">
+    <div class="tutorial-content">
+      <h4 id="tutorialTitle"></h4>
+      <p id="tutorialText"></p>
+      <div class="tutorial-buttons">
+        <button id="tutorialSkip" class="tutorial-btn tutorial-btn-secondary">Skip</button>
+        <button id="tutorialNext" class="tutorial-btn tutorial-btn-primary">Next</button>
+      </div>
     </div>
   </div>
 </div>

@@ -59,6 +59,7 @@ const stationWeatherMap = {
     // Only 4 visibility stations: Central, Chek Lap Kok, Sai Wan Ho, Waglan Island
     // Mapping generously based on geographic proximity
     "Central/Western": { tempPlace: "Hong Kong Observatory", rainPlace: "Central & Western District", windPlace: "Central Pier", pressurePlace: "HK Observatory", visPlace: "Central" },
+    "Central": { tempPlace: "Hong Kong Observatory", rainPlace: "Central & Western District", windPlace: "Central Pier", pressurePlace: "HK Observatory", visPlace: "Central" },
     "Eastern": { tempPlace: "King's Park", rainPlace: "Eastern District", windPlace: "North Point", pressurePlace: "HK Observatory", visPlace: "Sai Wan Ho" },
     "Islands": { tempPlace: "Chek Lap Kok", rainPlace: "Islands District", windPlace: "Chek Lap Kok", pressurePlace: "Chek Lap Kok", visPlace: "Chek Lap Kok" },
     "North": { tempPlace: "Ta Kwu Ling", rainPlace: "North District", windPlace: "Ta Kwu Ling", pressurePlace: "Ta Kwu Ling", visPlace: "Sai Wan Ho" },
@@ -74,7 +75,14 @@ const stationWeatherMap = {
     "Kowloon City": { tempPlace: "Kowloon City", rainPlace: "Kowloon City", windPlace: "Kai Tak", pressurePlace: "HK Observatory", visPlace: "Sai Wan Ho" },
     "Sham Shui Po": { tempPlace: "Sham Shui Po", rainPlace: "Sham Shui Po", windPlace: "King's Park", pressurePlace: "HK Observatory", visPlace: "Central" },
     "Wong Tai Sin": { tempPlace: "Wong Tai Sin", rainPlace: "Wong Tai Sin", windPlace: "Tate's Cairn", pressurePlace: "HK Observatory", visPlace: "Sai Wan Ho" },
-    "Kwun Tong": { tempPlace: "Kwun Tong", rainPlace: "Kwun Tong", windPlace: "Kai Tak", pressurePlace: "HK Observatory", visPlace: "Sai Wan Ho" }
+    "Kwun Tong": { tempPlace: "Kwun Tong", rainPlace: "Kwun Tong", windPlace: "Kai Tak", pressurePlace: "HK Observatory", visPlace: "Sai Wan Ho" },
+    // Additional AQHI stations
+    "Kwai Chung": { tempPlace: "Tsing Yi", rainPlace: "Kwai Tsing", windPlace: "Tsing Yi", pressurePlace: "HK Observatory", visPlace: "Central" },
+    "Tseung Kwan O": { tempPlace: "Tseung Kwan O", rainPlace: "Sai Kung", windPlace: "Tseung Kwan O", pressurePlace: "HK Observatory", visPlace: "Sai Wan Ho" },
+    "Tung Chung": { tempPlace: "Chek Lap Kok", rainPlace: "Islands District", windPlace: "Chek Lap Kok", pressurePlace: "Chek Lap Kok", visPlace: "Chek Lap Kok" },
+    "Tap Mun": { tempPlace: "Tap Mun", rainPlace: "North District", windPlace: "Tap Mun", pressurePlace: "HK Observatory", visPlace: "Waglan Island" },
+    "Causeway Bay": { tempPlace: "Happy Valley", rainPlace: "Wan Chai", windPlace: "North Point", pressurePlace: "HK Observatory", visPlace: "Sai Wan Ho" },
+    "Mong Kok": { tempPlace: "King's Park", rainPlace: "Yau Tsim Mong", windPlace: "King's Park", pressurePlace: "HK Observatory", visPlace: "Central" }
 };
 
 
@@ -363,6 +371,32 @@ const stationWeatherMap = {
   const beachQualityValue = document.getElementById("beachQualityValue");
   const beachPill = document.getElementById("beachPill");
   const layersUpdated = document.getElementById("layersUpdated");
+
+  // --- Info modal wiring: make pills clickable and show contextual help ---
+  const infoTargets = [
+    { el: aqhiRisk, key: 'aqhi' },
+    { el: no2Pill, key: 'no2' },
+    { el: o3Pill, key: 'o3' },
+    { el: so2Pill, key: 'so2' },
+    { el: coPill, key: 'co' },
+    { el: pm10Pill, key: 'pm10' },
+    { el: pm25Pill, key: 'pm25' },
+    { el: tempPill, key: 'temperature' },
+    { el: humPill, key: 'humidity' },
+    { el: uvPill, key: 'uv' },
+    { el: rainPill, key: 'rainfall' },
+    { el: windPill, key: 'wind' },
+    { el: visPill, key: 'visibility' },
+    { el: pressurePill, key: 'pressure' },
+    { el: pollenPill, key: 'pollen' },
+    { el: beachPill, key: 'beach' }
+  ];
+  infoTargets.forEach(t => {
+    if (t.el) {
+      t.el.classList.add('clickable-pill');
+      t.el.addEventListener('click', () => showInfoModal(t.key));
+    }
+  });
 
   // Warning metadata
   const warningMetadata = {
@@ -713,10 +747,15 @@ function updateActivityRecommendations(ctx){
 
   activityList.innerHTML = decisions.map(d => `
     <div class="activity-item">
-      <div class="activity-left"><img src="assets/${d.icon}" alt="${d.label}" class="activity-icon" /> ${d.label}</div>
+      <div class="activity-left">
+        <img src="assets/${d.icon}" alt="${d.label}" class="activity-icon" />
+        <div>
+          <div class="activity-label">${d.label}</div>
+          <div class="activity-reason">${d.reason}</div>
+        </div>
+      </div>
       <div>${badge(d.state)}</div>
     </div>
-    <div class="activity-reason">${d.reason}</div>
   `).join('');
 }
 
@@ -1022,9 +1061,13 @@ function closeForecastModal() {
 
 // Close modal when clicking outside
 window.onclick = function(event) {
-  const modal = document.getElementById("forecastModal");
-  if (event.target === modal) {
+  const forecastModal = document.getElementById("forecastModal");
+  const infoModal = document.getElementById("infoModal");
+  if (event.target === forecastModal) {
     closeForecastModal();
+  }
+  if (event.target === infoModal) {
+    closeInfoModal();
   }
 };
 
@@ -1067,6 +1110,225 @@ function getHealthAdvice(aqhi) {
   `;
   healthAdviceEl.style.borderLeftColor = color;
 }
+
+// --- Info Modal (measure explanations) ---
+const MEASURE_INFO = {
+  aqhi: {
+    title: 'AQHI — Air Quality Health Index',
+    html: `<p>AQHI is a 1–10+ index summarizing overall air pollution and potential health risk.</p>
+          <ul>
+            <li><strong>1–3 (Low):</strong> Good for outdoor activities.</li>
+            <li><strong>4–6 (Moderate):</strong> Generally acceptable.</li>
+            <li><strong>7 (High):</strong> Sensitive groups reduce prolonged outdoor exertion.</li>
+            <li><strong>8–10 (Very High):</strong> Reduce outdoor activities.</li>
+            <li><strong>10+ (Serious):</strong> Avoid outdoor activities.</li>
+          </ul>`
+  },
+  no2: { title: 'NO₂ — Nitrogen Dioxide (µg/m³)', html: `<p>Produced mainly from traffic and combustion. Higher levels can irritate airways.</p>` },
+  o3:  { title: 'O₃ — Ozone (µg/m³)', html: `<p>Forms in sunlight from other pollutants. High ozone can cause throat and chest irritation.</p>` },
+  so2: { title: 'SO₂ — Sulfur Dioxide (µg/m³)', html: `<p>From fuel sulfur. Elevated SO₂ may affect people with respiratory conditions.</p>` },
+  co:  { title: 'CO — Carbon Monoxide (µg/m³)', html: `<p>Colorless gas from incomplete combustion. High concentrations reduce oxygen delivery.</p>` },
+  pm10:{ title: 'PM₁₀ — Particles ≤10 µm (µg/m³)', html: `<p>Coarse particles (dust, sea salt). Higher values can reduce visibility and affect breathing.</p>` },
+  pm25:{ title: 'PM₂.₅ — Fine particles ≤2.5 µm (µg/m³)', html: `<p>Fine particles penetrate deep into lungs. Lower is better for health.</p>` },
+  temperature: { title: 'Temperature (°C)', html: `<p>Air temperature at station. Consider humidity and wind for heat/cold stress.</p>` },
+  humidity:    { title: 'Humidity (%)', html: `<p>Relative humidity. Higher humidity makes temperatures feel warmer; low humidity feels drier.</p>` },
+  uv:          { title: 'UV Index', html: `<p>Strength of sun UV radiation.</p><ul><li>0–2 Low</li><li>3–5 Moderate</li><li>6–7 High</li><li>8–10 Very High</li><li>11+ Extreme</li></ul>` },
+  rainfall:    { title: 'Rainfall (mm)', html: `<p>Rainfall in the past hour at district station.</p>` },
+  wind:        { title: 'Wind (km/h & direction)', html: `<p>Mean 10-min wind speed and direction. Higher wind disperses pollution but can feel cooler.</p>` },
+  visibility:  { title: 'Visibility (km)', html: `<p>Horizontal visibility distance. Lower visibility can be due to mist, rain, or particles.</p>` },
+  pressure:    { title: 'Air Pressure (hPa)', html: `<p>Sea-level adjusted pressure. Falling pressure often precedes unsettled weather.</p>` },
+  pollen:      { title: 'Pollen Index', html: `<p>Seasonal. Indicates airborne pollen levels that can trigger allergies.</p>` },
+  beach:       { title: 'Beach Water Quality', html: `<p>Seasonal ratings from EPD; available during swimming season.</p>` }
+};
+
+function showInfoModal(key){
+  const modal = document.getElementById('infoModal');
+  const titleEl = document.getElementById('infoModalTitle');
+  const bodyEl = document.getElementById('infoModalBody');
+  const info = MEASURE_INFO[key] || { title: 'About this reading', html: '<p>Details coming soon.</p>' };
+  titleEl.textContent = info.title;
+  bodyEl.innerHTML = info.html;
+  modal.classList.add('show');
+  // attach close button
+  const closeBtn = document.getElementById('infoModalClose');
+  if (closeBtn) closeBtn.onclick = closeInfoModal;
+}
+
+function closeInfoModal(){
+  const modal = document.getElementById('infoModal');
+  modal.classList.remove('show');
+}
+
+// --- Interactive Tutorial ---
+const tutorialSteps = [
+  {
+    title: 'Welcome to HK Weather Dashboard! 👋',
+    text: 'This quick tour will show you the interactive features. Click Next to continue.',
+    target: null,
+    position: 'center'
+  },
+  {
+    title: 'Select Your Station',
+    text: 'Choose from 17+ AQHI monitoring stations across Hong Kong to see localized readings.',
+    target: '#stationSelect',
+    position: 'bottom'
+  },
+  {
+    title: 'Learn About Readings',
+    text: 'Click any colored pill to learn what each measurement means and how to interpret it.',
+    target: '#aqhiRisk',
+    position: 'bottom'
+  },
+  {
+    title: '9-Day Forecasts',
+    text: 'Click temperature, humidity, or rainfall icons to view interactive 9-day forecast charts.',
+    target: '.clickable-icon',
+    position: 'bottom'
+  },
+  {
+    title: 'Activity Recommendations',
+    text: 'Check real-time suggestions for outdoor activities based on current conditions.',
+    target: '#activityList',
+    position: 'top'
+  },
+  {
+    title: 'Share & Help',
+    text: 'Share current conditions or restart this tour anytime using the buttons up top. Enjoy!',
+    target: '#shareButton',
+    position: 'bottom'
+  }
+];
+
+let currentTutorialStep = 0;
+let tutorialActive = false;
+
+function startTutorial() {
+  currentTutorialStep = 0;
+  tutorialActive = true;
+  const overlay = document.getElementById('tutorialOverlay');
+  overlay.style.display = 'block';
+  setTimeout(() => overlay.classList.add('active'), 10);
+  showTutorialStep();
+}
+
+function showTutorialStep() {
+  if (currentTutorialStep >= tutorialSteps.length) {
+    endTutorial();
+    return;
+  }
+
+  const step = tutorialSteps[currentTutorialStep];
+  const tooltip = document.getElementById('tutorialTooltip');
+  const title = document.getElementById('tutorialTitle');
+  const text = document.getElementById('tutorialText');
+  const nextBtn = document.getElementById('tutorialNext');
+  const skipBtn = document.getElementById('tutorialSkip');
+
+  title.textContent = step.title;
+  text.textContent = step.text;
+
+  // Clear previous highlights
+  document.querySelectorAll('.tutorial-highlight').forEach(el => {
+    el.classList.remove('tutorial-highlight');
+  });
+
+  // Remove previous arrow classes
+  tooltip.className = 'tutorial-tooltip';
+
+  if (step.target) {
+    const target = document.querySelector(step.target);
+    if (target) {
+      target.classList.add('tutorial-highlight');
+      positionTooltip(tooltip, target, step.position);
+    }
+  } else {
+    // Center position for intro/outro
+    tooltip.style.top = '50%';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translate(-50%, -50%)';
+  }
+
+  // Update button text for last step
+  if (currentTutorialStep === tutorialSteps.length - 1) {
+    nextBtn.textContent = 'Got it!';
+  } else {
+    nextBtn.textContent = 'Next';
+  }
+
+  // Wire up buttons
+  nextBtn.onclick = () => {
+    currentTutorialStep++;
+    showTutorialStep();
+  };
+  skipBtn.onclick = endTutorial;
+}
+
+function positionTooltip(tooltip, target, position) {
+  const rect = target.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  
+  let top, left;
+  
+  switch(position) {
+    case 'top':
+      top = rect.top - tooltipRect.height - 30;
+      left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+      tooltip.classList.add('arrow-bottom');
+      break;
+    case 'bottom':
+      top = rect.bottom + 20;
+      left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+      tooltip.classList.add('arrow-top');
+      break;
+    case 'left':
+      top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+      left = rect.left - tooltipRect.width - 30;
+      tooltip.classList.add('arrow-right');
+      break;
+    case 'right':
+      top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+      left = rect.right + 20;
+      tooltip.classList.add('arrow-left');
+      break;
+    default:
+      top = rect.bottom + 20;
+      left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+      tooltip.classList.add('arrow-top');
+  }
+  
+  // Keep tooltip in viewport
+  if (left < 10) left = 10;
+  if (left + tooltipRect.width > window.innerWidth - 10) {
+    left = window.innerWidth - tooltipRect.width - 10;
+  }
+  if (top < 10) top = 10;
+  
+  tooltip.style.top = top + 'px';
+  tooltip.style.left = left + 'px';
+  tooltip.style.transform = 'none';
+}
+
+function endTutorial() {
+  tutorialActive = false;
+  const overlay = document.getElementById('tutorialOverlay');
+  overlay.classList.remove('active');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    document.querySelectorAll('.tutorial-highlight').forEach(el => {
+      el.classList.remove('tutorial-highlight');
+    });
+  }, 300);
+  // Mark tutorial as seen
+  localStorage.setItem('hkdash-tutorial-seen', 'true');
+}
+
+// Auto-start tutorial on first visit
+window.addEventListener('load', () => {
+  const tutorialSeen = localStorage.getItem('hkdash-tutorial-seen');
+  if (!tutorialSeen) {
+    setTimeout(startTutorial, 1000);
+  }
+});
 
 // Get trend indicator
 function getTrendIndicator(current, previous) {
