@@ -14,6 +14,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
             height: 100vh;
             overflow: hidden;
             display: flex;
@@ -21,8 +22,7 @@
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: transparent;
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
@@ -473,52 +473,56 @@
         }
 
         @media (max-width: 700px) {
+            body {
+                height: 100dvh; /* Use dynamic viewport height for mobile browsers */
+            }
             .main-content {
                 grid-template-columns: 1fr !important;
-                padding: 6px;
-                padding-bottom: 85px;
+                padding: 4px;
+                padding-bottom: 100px; /* Increased to account for footer wrapping */
                 gap: 0;
             }
             .panel {
                 margin-bottom: 0;
                 height: auto;
-                min-height: 320px;
-                padding: 8px;
+                max-height: calc(100dvh - 200px); /* Constrain panel height */
+                overflow-y: auto;
+                padding: 6px;
             }
             .panel h2 {
-                font-size: 14px;
-                margin-bottom: 4px;
+                font-size: 13px;
+                margin-bottom: 3px;
             }
             .metric {
-                padding: 3px 0;
+                padding: 2px 0;
                 min-height: auto;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             }
             .metric-label {
-                font-size: 13px;
+                font-size: 12px;
                 display: flex;
                 align-items: center;
             }
             .metric-label img {
-                height: 36px !important;
-                width: 48px !important;
-                margin-right: 6px !important;
+                height: 32px !important;
+                width: 44px !important;
+                margin-right: 5px !important;
                 vertical-align: middle !important;
                 object-fit: contain;
             }
             .metric-label img.clickable-icon {
-                height: 48px !important;
-                width: 48px !important;
+                height: 44px !important;
+                width: 44px !important;
             }
             .metric-value {
-                font-size: 14px;
-                padding: 4px 10px;
-                min-width: 80px;
-                width: 80px;
+                font-size: 13px;
+                padding: 3px 8px;
+                min-width: 75px;
+                width: 75px;
             }
             .warning-icon-small {
-                width: 28px !important;
-                height: 28px !important;
+                width: 24px !important;
+                height: 24px !important;
             }
             .footer {
                 padding: 6px 10px;
@@ -1638,8 +1642,8 @@
                                 humidityValueEl.style.backgroundColor = setColour(humidity.value, [25, 30, 60, 70, 9999], ["#caefff", "#99e5ff", "#66cbff", "#2cb4fe", "#0099ff"]);
                             }
 
-                            // UV Index with color coding
-                            uvValueEl.textContent = (uv?.value != null) ? `${uv.value}` : '—';
+                            // UV Index with color coding (round to whole number)
+                            uvValueEl.textContent = (uv?.value != null) ? `${Math.round(uv.value)}` : '—';
                             if (uv?.value != null) {
                                 uvValueEl.style.backgroundColor = setColour(uv.value, [2, 5, 7, 10, 9999], ["#67be4d", "#fcbc22", "#f66b33", "#ed164a", "#7e4399"]);
                             }
