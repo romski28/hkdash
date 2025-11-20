@@ -261,27 +261,25 @@
 
         .metric-value {
             font-size: 18px;
-            font-weight: bold;
-            color: #1f2937;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-            backdrop-filter: blur(10px);
+            font-weight: 600;
+            color: #111827; /* default text for light pills */
+            background: none; /* remove glass gradient */
+            backdrop-filter: none; /* remove blur */
             padding: 8px 16px;
             border-radius: 12px;
             min-width: 120px;
             width: 120px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 
-                        0 1px 3px rgba(0, 0, 0, 0.08),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.15);
+            transition: filter 0.25s ease, transform 0.25s ease;
+            filter: saturate(160%) contrast(112%);
         }
 
         .metric-value:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            filter: saturate(180%) contrast(118%);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.12);
         }
 
         .status-indicator {
@@ -307,6 +305,7 @@
             z-index: 10000;
             justify-content: center;
             align-items: center;
+            padding: 0 20px;
         }
 
         .modal-content {
@@ -317,6 +316,7 @@
             max-height: 100vh;
             overflow-y: auto;
             position: relative;
+            width: 100%;
         }
 
         .close-btn {
@@ -472,6 +472,35 @@
             line-height: 1.6;
         }
 
+        /* Footer stacked layout for mobile and small tablets */
+        @media (max-width: 800px) {
+            .footer {
+                padding: 6px 10px;
+                font-size: 8px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .footer-left {
+                gap: 8px;
+                width: 100%;
+                justify-content: center;
+            }
+            .footer-citations {
+                text-align: center;
+            }
+            .footer-buttons {
+                gap: 6px;
+                width: 100%;
+                justify-content: stretch;
+            }
+            .footer-buttons button {
+                padding: 8px 12px;
+                font-size: 11px;
+                flex: 1;
+                min-width: 0;
+            }
+        }
+
         /* Tablet view (2 columns) */
         @media (min-width: 701px) and (max-width: 1024px) {
             body {
@@ -596,23 +625,6 @@
             }
             .footer-left img {
                 height: 24px !important;
-            }
-            .footer-citations {
-                font-size: 8px;
-                gap: 1px;
-                line-height: 1.2;
-                text-align: center;
-            }
-            .footer-buttons {
-                gap: 6px;
-                width: 100%;
-                justify-content: stretch;
-            }
-            .footer-buttons button {
-                padding: 8px 12px;
-                font-size: 11px;
-                flex: 1;
-                min-width: 0;
             }
             .panel-switcher {
                 display: flex;
@@ -993,6 +1005,85 @@
 
             let html = `<h2>${info.title}</h2>`;
             html += `<div class="metric-description"><p>${info.description}</p></div>`;
+
+            // Inject pollutant grading ranges (only for the selected pollutant)
+            const pollutantTypes = ['no2','o3','so2','co','pm10','pm25'];
+            if (pollutantTypes.includes(metricType)) {
+                const pollutantMeta = {
+                    no2: { label: 'NO₂', checks: [40, 90, 120, 230, 340, 9999], unit: 'µg/m³', name: 'Nitrogen Dioxide' },
+                    o3:  { label: 'O₃',  checks: [50, 100, 130, 240, 380, 9999], unit: 'µg/m³', name: 'Ozone' },
+                    so2: { label: 'SO₂', checks: [100, 200, 350, 500, 750, 9999], unit: 'µg/m³', name: 'Sulfur Dioxide' },
+                    co:  { label: 'CO',  checks: [4000, 20000, 35000, 50000, 75000, 999999999999], unit: 'µg/m³', name: 'Carbon Monoxide' },
+                    pm10:{ label: 'PM₁₀',checks: [20, 40, 50, 100, 150, 9999], unit: 'µg/m³', name: 'PM₁₀ Particulate' },
+                    pm25:{ label: 'PM₂.₅',checks: [10, 20, 25, 50, 75, 9999], unit: 'µg/m³', name: 'PM₂.₅ Particulate' }
+                };
+
+                const advisoryByGrade = {
+                    1: { title: 'Good', text: 'Air quality poses little or no risk.' },
+                    2: { title: 'Fair', text: 'Acceptable; very sensitive people watch symptoms.' },
+                    3: { title: 'Moderate', text: 'Sensitive groups limit prolonged outdoor exertion.' },
+                    4: { title: 'Unhealthy (SG)', text: 'Sensitive groups reduce/avoid prolonged outdoor exertion.' },
+                    5: { title: 'Unhealthy', text: 'Everyone reduce heavy/prolonged exertion; sensitive groups avoid.' },
+                    6: { title: 'Very Unhealthy', text: 'Avoid outdoor exertion; move activities indoors.' }
+                };
+
+                const meta = pollutantMeta[metricType];
+                const colours = ["#00e5ff", "#00e676", "#ffea00", "#ff3d00", "#d50000", "#aa00ff"];
+
+                function format(n){ return n.toLocaleString('en-US'); }
+                function buildRanges(checks){
+                    const ranges = [];
+                    for (let i=0;i<checks.length;i++){
+                        const upper = checks[i];
+                        if (i === 0) {
+                            ranges.push({ grade: 1, range: `≤${format(upper)}` });
+                        } else if (i === checks.length - 1) {
+                            const prev = checks[i-1] + 1;
+                            ranges.push({ grade: i+1, range: `≥${format(prev)}` });
+                        } else {
+                            const prev = checks[i-1] + 1;
+                            ranges.push({ grade: i+1, range: `${format(prev)}–${format(upper)}` });
+                        }
+                    }
+                    return ranges;
+                }
+                const ranges = buildRanges(meta.checks);
+
+                html += `<div class="modal-section">
+                    <h3>${meta.label} Grading</h3>
+                    <details open style="margin-top:4px;">
+                        <summary style="cursor:pointer; font-size:12px; font-weight:600; color:#374151;">Show grading & advisory</summary>
+                        <div style="margin-top:8px;">
+                            <p style="font-size:11px; color:#6b7280; line-height:1.3; margin-bottom:6px;">Grade 1 = lowest concentration (best). Units: ${meta.unit}. Simplified visual scale; not an official health index.</p>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 10px;">
+                                ${ranges.map(r => {
+                                    const col = colours[r.grade-1];
+                                    const useLight = ['#d50000','#aa00ff','#ff3d00'].includes(col);
+                                    const fg = useLight ? '#ffffff' : '#000000';
+                                    return `<span style=\"background:${col};color:${fg};padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;min-width:26px;text-align:center;\">${r.grade}</span>`;
+                                }).join('')}
+                            </div>
+                            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px;">
+                                <thead>
+                                    <tr style="background:#f3f4f6;">
+                                        <th style="text-align:left; padding:5px 6px; border:1px solid #e5e7eb;">Grade</th>
+                                        <th style="text-align:left; padding:5px 6px; border:1px solid #e5e7eb;">${meta.label} Range</th>
+                                        <th style="text-align:left; padding:5px 6px; border:1px solid #e5e7eb;">Advisory</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${ranges.map(r => `<tr ${r.grade%2===0? 'style=\"background:#fafafa;\"':''}>
+                                        <td style=\"padding:5px 6px; border:1px solid #e5e7eb; font-weight:600;\">${r.grade}</td>
+                                        <td style=\"padding:5px 6px; border:1px solid #e5e7eb;\">${r.range}</td>
+                                        <td style=\"padding:5px 6px; border:1px solid #e5e7eb;\"><span style=\"font-weight:600;\">${advisoryByGrade[r.grade].title}:</span> ${advisoryByGrade[r.grade].text}</td>
+                                    </tr>`).join('')}
+                                </tbody>
+                            </table>
+                            <p style="font-size:10px; color:#9ca3af;">Guide only – consult official sources for health advisories.</p>
+                        </div>
+                    </details>
+                </div>`;
+            }
 
             if (info.hasForecast) {
                 try {
@@ -1662,7 +1753,7 @@
                                 windValueEl.textContent = '—';
                             } else {
                                 windValueEl.textContent = `${rec.mean} km/h${abbr ? ' ' + abbr : ''}`;
-                                windValueEl.style.backgroundColor = setColour(rec.mean, [9, 19, 39, 59, 9999], ["#86efac", "#4ade80", "#fde68a", "#fca5a5", "#f87171"]);
+                                windValueEl.style.backgroundColor = setColour(rec.mean, [9, 19, 39, 59, 9999], ["#b2ff59", "#76ff03", "#ffea00", "#ff6d00", "#ff1744"]);
                             }
                         } catch(e){ console.warn('Wind CSV load failed', e); }
                     }
@@ -1680,7 +1771,7 @@
                                 visibilityValueEl.textContent = '—';
                             } else {
                                 visibilityValueEl.textContent = `${rec.visibility} km`;
-                                visibilityValueEl.style.backgroundColor = setColour(rec.visibility, [3, 5, 8, 12, 9999], ["#fca5a5", "#fde68a", "#86efac", "#4ade80", "#22c55e"]);
+                                visibilityValueEl.style.backgroundColor = setColour(rec.visibility, [3, 5, 8, 12, 9999], ["#ff1744", "#ffea00", "#b2ff59", "#76ff03", "#00e676"]);
                             }
                         } catch(e){ console.warn('Visibility CSV load failed', e); }
                     }
@@ -1698,43 +1789,43 @@
                             const wind = weatherData.wind || weatherData.wind?.data?.[0] || null;
                             const visibility = weatherData.visibility?.data?.[0] || weatherData.visibility || null;
 
-                            // Temperature with color coding
+                            // Temperature with color coding - more vivid blues to reds
                             tempValueEl.textContent = (temp?.value != null) ? `${temp.value}°C` : '—';
                             if (temp?.value != null) {
-                                tempValueEl.style.backgroundColor = setColour(temp.value, [-32, -12, 0, 16, 29, 9999], ["#059bfc", "#7ed8fe", "#35fd63", "#fce26b", "#fe9e01", "#ff0304"]);
+                                tempValueEl.style.backgroundColor = setColour(temp.value, [-32, -12, 0, 16, 29, 9999], ["#0066ff", "#00e5ff", "#00ff00", "#ffcc00", "#ff6600", "#ff0000"]);
                             }
 
-                            // Humidity with color coding
+                            // Humidity with color coding - vibrant blues
                             humidityValueEl.textContent = (humidity?.value != null) ? `${humidity.value}%` : '—';
                             if (humidity?.value != null) {
-                                humidityValueEl.style.backgroundColor = setColour(humidity.value, [25, 30, 60, 70, 9999], ["#caefff", "#99e5ff", "#66cbff", "#2cb4fe", "#0099ff"]);
+                                humidityValueEl.style.backgroundColor = setColour(humidity.value, [25, 30, 60, 70, 9999], ["#80d8ff", "#40c4ff", "#00b0ff", "#0091ea", "#01579b"]);
                             }
 
-                            // UV Index with color coding (round to whole number)
+                            // UV Index with color coding (round to whole number) - bright greens to purples
                             uvValueEl.textContent = (uv?.value != null) ? `${Math.round(uv.value)}` : '—';
                             if (uv?.value != null) {
-                                uvValueEl.style.backgroundColor = setColour(uv.value, [2, 5, 7, 10, 9999], ["#67be4d", "#fcbc22", "#f66b33", "#ed164a", "#7e4399"]);
+                                uvValueEl.style.backgroundColor = setColour(uv.value, [2, 5, 7, 10, 9999], ["#00e676", "#ffea00", "#ff6d00", "#ff1744", "#d500f9"]);
                             }
 
-                            // Rain with color coding
+                            // Rain with color coding - bright yellows to blues to reds
                             rainValueEl.textContent = (typeof rain?.max === 'number') ? `${rain.max} mm` : '—';
                             if (typeof rain?.max === 'number') {
-                                rainValueEl.style.backgroundColor = setColour(rain.max, [1, 29, 50, 70, 9999], ["#fedf68", "#7bdafc", "#f66b33", "#ed164a", "#000000"]);
+                                rainValueEl.style.backgroundColor = setColour(rain.max, [1, 29, 50, 70, 9999], ["#ffea00", "#2979ff", "#ff6d00", "#ff1744", "#000000"]);
                             }
 
-                            // Wind with color coding
+                            // Wind with color coding - vibrant greens to yellows to reds
                             const windSpeed = (typeof wind?.speed === 'number') ? wind.speed : (typeof wind?.speed?.value === 'number') ? wind.speed.value : null;
                             const windDir = wind?.direction?.value || wind?.direction || wind?.compassDirection || null;
                             windValueEl.textContent = (windSpeed != null) ? `${windSpeed} km/h${windDir ? ' ' + windDir : ''}` : '—';
                             if (windSpeed != null) {
-                                windValueEl.style.backgroundColor = setColour(windSpeed, [9, 19, 39, 59, 9999], ["#86efac", "#4ade80", "#fde68a", "#fca5a5", "#f87171"]);
+                                windValueEl.style.backgroundColor = setColour(windSpeed, [9, 19, 39, 59, 9999], ["#b2ff59", "#76ff03", "#ffea00", "#ff6d00", "#ff1744"]);
                             }
 
-                            // Visibility with color coding
+                            // Visibility with color coding - reds to greens (reversed scale)
                             const visVal = (typeof visibility?.value === 'number') ? visibility.value : (typeof visibility?.km === 'number') ? visibility.km : null;
                             visibilityValueEl.textContent = (visVal != null) ? `${visVal} km` : '—';
                             if (visVal != null) {
-                                visibilityValueEl.style.backgroundColor = setColour(visVal, [3, 5, 8, 12, 9999], ["#fca5a5", "#fde68a", "#86efac", "#4ade80", "#22c55e"]);
+                                visibilityValueEl.style.backgroundColor = setColour(visVal, [3, 5, 8, 12, 9999], ["#ff1744", "#ffea00", "#b2ff59", "#76ff03", "#00e676"]);
                             }
 
                             // Override with station-specific CSV where available
@@ -1760,46 +1851,70 @@
 
                             const get = tag => latest.getElementsByTagName(tag)[0]?.textContent ?? '—';
                             
-                            // NO2 with color coding
+                            // NO2 with color coding - more vivid air quality scale
                             const no2 = get('NO2');
                             no2ValueEl.textContent = no2;
                             if (no2 !== '—') {
-                                no2ValueEl.style.backgroundColor = setColour(Number(no2), [40, 90, 120, 230, 340, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
+                                no2ValueEl.style.backgroundColor = setColour(Number(no2), [40, 90, 120, 230, 340, 9999], ["#00e5ff", "#00e676", "#ffea00", "#ff3d00", "#d50000", "#aa00ff"]);
+                                no2ValueEl.style.color = '#111827';
+                            } else {
+                                no2ValueEl.style.backgroundColor = '#9ca3af';
+                                no2ValueEl.style.color = '#ffffff';
                             }
 
-                            // O3 with color coding
+                            // O3 with color coding - more vivid air quality scale
                             const o3 = get('O3');
                             o3ValueEl.textContent = o3;
                             if (o3 !== '—') {
-                                o3ValueEl.style.backgroundColor = setColour(Number(o3), [50, 100, 130, 240, 380, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
+                                o3ValueEl.style.backgroundColor = setColour(Number(o3), [50, 100, 130, 240, 380, 9999], ["#00e5ff", "#00e676", "#ffea00", "#ff3d00", "#d50000", "#aa00ff"]);
+                                o3ValueEl.style.color = '#111827';
+                            } else {
+                                o3ValueEl.style.backgroundColor = '#9ca3af';
+                                o3ValueEl.style.color = '#ffffff';
                             }
 
-                            // SO2 with color coding
+                            // SO2 with color coding - more vivid air quality scale
                             const so2 = get('SO2');
                             so2ValueEl.textContent = so2;
                             if (so2 !== '—') {
-                                so2ValueEl.style.backgroundColor = setColour(Number(so2), [100, 200, 350, 500, 750, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
+                                so2ValueEl.style.backgroundColor = setColour(Number(so2), [100, 200, 350, 500, 750, 9999], ["#00e5ff", "#00e676", "#ffea00", "#ff3d00", "#d50000", "#aa00ff"]);
+                                so2ValueEl.style.color = '#111827';
+                            } else {
+                                so2ValueEl.style.backgroundColor = '#9ca3af';
+                                so2ValueEl.style.color = '#ffffff';
                             }
 
-                            // CO with color coding
+                            // CO with color coding - more vivid air quality scale
                             const co = get('CO');
                             coValueEl.textContent = co;
                             if (co !== '—') {
-                                coValueEl.style.backgroundColor = setColour(Number(co), [4000, 20000, 35000, 50000, 75000, 999999999999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
+                                coValueEl.style.backgroundColor = setColour(Number(co), [4000, 20000, 35000, 50000, 75000, 999999999999], ["#00e5ff", "#00e676", "#ffea00", "#ff3d00", "#d50000", "#aa00ff"]);
+                                coValueEl.style.color = '#111827';
+                            } else {
+                                coValueEl.style.backgroundColor = '#9ca3af';
+                                coValueEl.style.color = '#ffffff';
                             }
 
-                            // PM10 with color coding
+                            // PM10 with color coding - more vivid air quality scale
                             const pm10 = get('PM10');
                             pm10ValueEl.textContent = pm10;
                             if (pm10 !== '—') {
-                                pm10ValueEl.style.backgroundColor = setColour(Number(pm10), [20, 40, 50, 100, 150, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
+                                pm10ValueEl.style.backgroundColor = setColour(Number(pm10), [20, 40, 50, 100, 150, 9999], ["#00e5ff", "#00e676", "#ffea00", "#ff3d00", "#d50000", "#aa00ff"]);
+                                pm10ValueEl.style.color = '#111827';
+                            } else {
+                                pm10ValueEl.style.backgroundColor = '#9ca3af';
+                                pm10ValueEl.style.color = '#ffffff';
                             }
 
-                            // PM2.5 with color coding
+                            // PM2.5 with color coding - more vivid air quality scale
                             const pm25 = get('PM2.5');
                             pm25ValueEl.textContent = pm25;
                             if (pm25 !== '—') {
-                                pm25ValueEl.style.backgroundColor = setColour(Number(pm25), [10, 20, 25, 50, 75, 9999], ["#7cdded", "#7bda72", "#f0c42d", "#ec2c45", "#960232", "#512771"]);
+                                pm25ValueEl.style.backgroundColor = setColour(Number(pm25), [10, 20, 25, 50, 75, 9999], ["#00e5ff", "#00e676", "#ffea00", "#ff3d00", "#d50000", "#aa00ff"]);
+                                pm25ValueEl.style.color = '#111827';
+                            } else {
+                                pm25ValueEl.style.backgroundColor = '#9ca3af';
+                                pm25ValueEl.style.color = '#ffffff';
                             }
                                     } catch(e){
                             console.warn('Pollutants fetch failed', e);
