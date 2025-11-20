@@ -1201,65 +1201,65 @@
         async function loadMetricDetails(metricType) {
             const metricInfo = {
                 temperature: {
-                    title: '🌡️ Temperature',
+                    title: '<img class="warning-icon" src="assets/temp.png"> Temperature',
                     description: 'Air temperature measured in degrees Celsius. Temperature affects comfort levels and energy consumption. Hong Kong experiences subtropical climate with hot summers and mild winters.',
                     hasForecast: true,
                     chartType: 'temperature'
                 },
                 humidity: {
-                    title: '💧 Humidity',
+                    title: '<img class="warning-icon" src="assets/hum.png"> Humidity',
                     description: 'Relative humidity indicates the amount of moisture in the air. High humidity can make hot weather feel more uncomfortable. Hong Kong typically has high humidity year-round.',
                     hasForecast: true,
                     chartType: 'humidity'
                 },
                 uv: {
-                    title: '☀️ UV Index',
+                    title: '<img class="warning-icon" src="assets/uv.png"> UV Index',
                     description: 'UV Index measures ultraviolet radiation intensity. Higher values indicate greater risk of skin damage. Levels: 0-2 Low, 3-5 Moderate, 6-7 High, 8-10 Very High, 11+ Extreme.',
                     hasForecast: false
                 },
                 rain: {
-                    title: '🌧️ Rainfall',
+                    title: '<img class="warning-icon" src="assets/rain.png"> Rainfall',
                     description: 'Precipitation measured in millimeters. Shows recent rainfall accumulation. Hong Kong receives most rainfall during the monsoon season (May-September).',
                     hasForecast: true,
                     chartType: 'rain'
                 },
                 wind: {
-                    title: '💨 Wind',
+                    title: '<img class="warning-icon" src="assets/wind.png"> Wind',
                     description: 'Wind speed and direction. Measured in kilometers per hour. Important for outdoor activities and air quality dispersion. Strong winds can indicate approaching weather systems.',
                     hasForecast: false
                 },
                 visibility: {
-                    title: '👁️ Visibility',
+                    title: '<img class="warning-icon" src="assets/visibility.png"> Visibility',
                     description: 'Horizontal visibility distance in kilometers. Reduced visibility can be caused by fog, haze, or air pollution. Important for aviation and maritime activities.',
                     hasForecast: false
                 },
                 no2: {
-                    title: '🏭 Nitrogen Dioxide (NO₂)',
+                    title: 'Nitrogen Dioxide (NO₂)',
                     description: 'A reddish-brown gas primarily from vehicle emissions and power plants. Can irritate airways and worsen respiratory conditions. Measured in µg/m³.',
                     hasForecast: false
                 },
                 o3: {
-                    title: '🌫️ Ozone (O₃)',
+                    title: 'Ozone (O₃)',
                     description: 'Ground-level ozone forms when pollutants react with sunlight. Can cause breathing difficulties and reduce lung function. Typically higher on hot, sunny days.',
                     hasForecast: false
                 },
                 so2: {
-                    title: '🏭 Sulfur Dioxide (SO₂)',
+                    title: 'Sulfur Dioxide (SO₂)',
                     description: 'Produced by burning fossil fuels and industrial processes. Can cause respiratory problems and acid rain. Measured in µg/m³.',
                     hasForecast: false
                 },
                 co: {
-                    title: '🚗 Carbon Monoxide (CO)',
+                    title: 'Carbon Monoxide (CO)',
                     description: 'Colorless, odorless gas from incomplete combustion. Mainly from vehicle exhaust. Reduces oxygen delivery to body tissues.',
                     hasForecast: false
                 },
                 pm10: {
-                    title: '💨 PM₁₀ Particulate Matter',
+                    title: 'PM₁₀ Particulate Matter',
                     description: 'Particles with diameter ≤10 micrometers. Can be inhaled into lungs causing respiratory issues. Sources include dust, pollen, and combustion.',
                     hasForecast: false
                 },
                 pm25: {
-                    title: '☁️ PM₂.₅ Particulate Matter',
+                    title: 'PM₂.₅ Particulate Matter',
                     description: 'Fine particles ≤2.5 micrometers. Can penetrate deep into lungs and bloodstream. Major health concern from vehicle emissions and industrial sources.',
                     hasForecast: false
                 }
@@ -1275,12 +1275,12 @@
             const pollutantTypes = ['no2','o3','so2','co','pm10','pm25'];
             if (pollutantTypes.includes(metricType)) {
                 const pollutantMeta = {
-                    no2: { label: 'NO₂', checks: [40, 90, 120, 230, 340, 9999], unit: 'µg/m³', name: 'Nitrogen Dioxide' },
-                    o3:  { label: 'O₃',  checks: [50, 100, 130, 240, 380, 9999], unit: 'µg/m³', name: 'Ozone' },
+                    no2: { label: 'NO₂', checks: [50, 100, 150, 200, 300, 9999], unit: 'µg/m³', name: 'Nitrogen Dioxide' },
+                    o3:  { label: 'O₃',  checks: [80, 120, 160, 200, 250, 9999], unit: 'µg/m³', name: 'Ozone' },
                     so2: { label: 'SO₂', checks: [100, 200, 350, 500, 750, 9999], unit: 'µg/m³', name: 'Sulfur Dioxide' },
-                    co:  { label: 'CO',  checks: [4000, 20000, 35000, 50000, 75000, 999999999999], unit: 'µg/m³', name: 'Carbon Monoxide' },
-                    pm10:{ label: 'PM₁₀',checks: [20, 40, 50, 100, 150, 9999], unit: 'µg/m³', name: 'PM₁₀ Particulate' },
-                    pm25:{ label: 'PM₂.₅',checks: [10, 20, 25, 50, 75, 9999], unit: 'µg/m³', name: 'PM₂.₅ Particulate' }
+                    co:  { label: 'CO',  checks: [5000, 10000, 15000, 20000, 30000, 999999999999], unit: 'µg/m³', name: 'Carbon Monoxide' },
+                    pm10:{ label: 'PM₁₀',checks: [30, 60, 100, 150, 200, 9999], unit: 'µg/m³', name: 'PM₁₀ Particulate' },
+                    pm25:{ label: 'PM₂.₅',checks: [15, 30, 50, 75, 100, 9999], unit: 'µg/m³', name: 'PM₂.₅ Particulate' }
                 };
 
                 const advisoryByGrade = {
