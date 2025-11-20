@@ -1753,7 +1753,8 @@
                                 windValueEl.textContent = '—';
                             } else {
                                 windValueEl.textContent = `${rec.mean} km/h${abbr ? ' ' + abbr : ''}`;
-                                windValueEl.style.backgroundColor = setColour(rec.mean, [9, 19, 39, 59, 9999], ["#b2ff59", "#76ff03", "#ffea00", "#ff6d00", "#ff1744"]);
+                                // Wind CSV override uses same bands as live reading
+                                windValueEl.style.backgroundColor = setColour(rec.mean, [9, 19, 39, 59, 79, 9999], ["#b2ff59", "#76ff03", "#ffea00", "#ff6d00", "#ff1744", "#d50000"]);
                             }
                         } catch(e){ console.warn('Wind CSV load failed', e); }
                     }
@@ -1771,7 +1772,8 @@
                                 visibilityValueEl.textContent = '—';
                             } else {
                                 visibilityValueEl.textContent = `${rec.visibility} km`;
-                                visibilityValueEl.style.backgroundColor = setColour(rec.visibility, [3, 5, 8, 12, 9999], ["#ff1744", "#ffea00", "#b2ff59", "#76ff03", "#00e676"]);
+                                // Visibility CSV override bands: ≤3 poor, 4–5 hazy, 6–8 moderate, 9–12 good, 13–20 very good, ≥21 excellent
+                                visibilityValueEl.style.backgroundColor = setColour(rec.visibility, [3, 5, 8, 12, 20, 9999], ["#ff1744", "#ffea00", "#b2ff59", "#76ff03", "#00e676", "#00e5ff"]);
                             }
                         } catch(e){ console.warn('Visibility CSV load failed', e); }
                     }
@@ -1789,16 +1791,17 @@
                             const wind = weatherData.wind || weatherData.wind?.data?.[0] || null;
                             const visibility = weatherData.visibility?.data?.[0] || weatherData.visibility || null;
 
-                            // Temperature with color coding - more vivid blues to reds
+                            // Temperature with color coding (bands: ≤0, 1–10, 11–16, 17–23, 24–29, 30–32, ≥33)
+                            // Added heat stress pre-red band to distinguish hot vs very hot
                             tempValueEl.textContent = (temp?.value != null) ? `${temp.value}°C` : '—';
                             if (temp?.value != null) {
-                                tempValueEl.style.backgroundColor = setColour(temp.value, [-32, -12, 0, 16, 29, 9999], ["#0066ff", "#00e5ff", "#00ff00", "#ffcc00", "#ff6600", "#ff0000"]);
+                                tempValueEl.style.backgroundColor = setColour(temp.value, [0, 10, 16, 23, 29, 32, 9999], ["#0066ff", "#00e5ff", "#00ff00", "#ffcc00", "#ff6600", "#ff3300", "#ff0000"]);
                             }
 
-                            // Humidity with color coding - vibrant blues
+                            // Humidity with color coding (comfort-oriented bands: ≤40 dry, 41–60 comfortable, 61–75 humid, 76–85 very humid, ≥86 oppressive)
                             humidityValueEl.textContent = (humidity?.value != null) ? `${humidity.value}%` : '—';
                             if (humidity?.value != null) {
-                                humidityValueEl.style.backgroundColor = setColour(humidity.value, [25, 30, 60, 70, 9999], ["#80d8ff", "#40c4ff", "#00b0ff", "#0091ea", "#01579b"]);
+                                humidityValueEl.style.backgroundColor = setColour(humidity.value, [40, 60, 75, 85, 9999], ["#80d8ff", "#40c4ff", "#00b0ff", "#0091ea", "#01579b"]);
                             }
 
                             // UV Index with color coding (round to whole number) - bright greens to purples
@@ -1807,10 +1810,10 @@
                                 uvValueEl.style.backgroundColor = setColour(uv.value, [2, 5, 7, 10, 9999], ["#00e676", "#ffea00", "#ff6d00", "#ff1744", "#d500f9"]);
                             }
 
-                            // Rain with color coding - bright yellows to blues to reds
+                            // Rain with color coding (intensity bands: ≤1 trace, 2–10 light, 11–30 moderate, 31–70 heavy, 71–120 very heavy, ≥121 extreme)
                             rainValueEl.textContent = (typeof rain?.max === 'number') ? `${rain.max} mm` : '—';
                             if (typeof rain?.max === 'number') {
-                                rainValueEl.style.backgroundColor = setColour(rain.max, [1, 29, 50, 70, 9999], ["#ffea00", "#2979ff", "#ff6d00", "#ff1744", "#000000"]);
+                                rainValueEl.style.backgroundColor = setColour(rain.max, [1, 10, 30, 70, 120, 9999], ["#ffea00", "#2979ff", "#ff6d00", "#ff1744", "#800000", "#000000"]);
                             }
 
                             // Wind with color coding - vibrant greens to yellows to reds
@@ -1818,14 +1821,15 @@
                             const windDir = wind?.direction?.value || wind?.direction || wind?.compassDirection || null;
                             windValueEl.textContent = (windSpeed != null) ? `${windSpeed} km/h${windDir ? ' ' + windDir : ''}` : '—';
                             if (windSpeed != null) {
-                                windValueEl.style.backgroundColor = setColour(windSpeed, [9, 19, 39, 59, 9999], ["#b2ff59", "#76ff03", "#ffea00", "#ff6d00", "#ff1744"]);
+                                // Wind bands: ≤9 calm/light, 10–19 gentle, 20–39 moderate, 40–59 fresh/strong, 60–79 very strong, ≥80 gale+ 
+                                windValueEl.style.backgroundColor = setColour(windSpeed, [9, 19, 39, 59, 79, 9999], ["#b2ff59", "#76ff03", "#ffea00", "#ff6d00", "#ff1744", "#d50000"]);
                             }
 
                             // Visibility with color coding - reds to greens (reversed scale)
                             const visVal = (typeof visibility?.value === 'number') ? visibility.value : (typeof visibility?.km === 'number') ? visibility.km : null;
                             visibilityValueEl.textContent = (visVal != null) ? `${visVal} km` : '—';
                             if (visVal != null) {
-                                visibilityValueEl.style.backgroundColor = setColour(visVal, [3, 5, 8, 12, 9999], ["#ff1744", "#ffea00", "#b2ff59", "#76ff03", "#00e676"]);
+                                visibilityValueEl.style.backgroundColor = setColour(visVal, [3, 5, 8, 12, 20, 9999], ["#ff1744", "#ffea00", "#b2ff59", "#76ff03", "#00e676", "#00e5ff"]);
                             }
 
                             // Override with station-specific CSV where available
