@@ -244,10 +244,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 14px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             flex: 1;
-            min-height: 0;
+            min-height: 64px;
         }
 
         .metric:last-child {
@@ -257,6 +257,23 @@
         .metric-label {
             font-size: 14px;
             color: #d1d5db;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .metric-label img {
+            height: 52px;
+            width: auto;
+            max-width: 64px;
+            object-fit: contain;
+        }
+
+        /* Air Quality icons are larger since they have no text labels */
+        #airPanel .metric-label img {
+            height: 62px;
+            max-width: 74px;
         }
 
         .metric-value {
@@ -267,13 +284,14 @@
             backdrop-filter: none; /* remove blur */
             padding: 8px 16px;
             border-radius: 12px;
-            min-width: 120px;
-            width: 120px;
+            min-width: 110px;
+            max-width: 140px;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
             border: 1px solid rgba(0,0,0,0.15);
             transition: filter 0.25s ease, transform 0.25s ease;
             filter: saturate(160%) contrast(112%);
+            flex-shrink: 0;
         }
 
         .metric-value:hover {
@@ -404,14 +422,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.45);
             z-index: 99999;
             animation: fadeIn 0.3s ease;
         }
 
         .tour-spotlight {
             position: absolute;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
             border-radius: 8px;
             z-index: 100000;
             transition: all 0.4s ease;
@@ -495,6 +513,28 @@
         @keyframes slideIn {
             from { transform: translateY(10px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* AQHI Badge */
+        .aqhi-badge {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            margin-left: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            line-height: 32px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .aqhi-badge:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .forecast-chart {
@@ -626,22 +666,25 @@
                 margin-bottom: 10px;
             }
             .metric {
-                padding: 6px 0;
+                padding: 10px 0;
+                min-height: 56px;
             }
             .metric-label {
                 font-size: 13px;
             }
             .metric-label img {
-                height: 32px !important;
+                height: 44px;
+                max-width: 56px;
             }
-            .metric-label img.clickable-icon {
-                height: 42px !important;
+            #airPanel .metric-label img {
+                height: 52px;
+                max-width: 64px;
             }
             .metric-value {
                 font-size: 16px;
                 padding: 6px 12px;
-                min-width: 100px;
-                width: 100px;
+                min-width: 95px;
+                max-width: 120px;
             }
         }
 
@@ -693,31 +736,29 @@
                 margin-bottom: 2px;
             }
             .metric {
-                padding: 1px 0;
-                min-height: auto;
+                padding: 8px 0;
+                min-height: 50px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             }
             .metric-label {
                 font-size: 11px;
-                display: flex;
-                align-items: center;
+                flex: 1;
+                min-width: 0;
             }
             .metric-label img {
-                height: 28px !important;
-                width: 40px !important;
-                margin-right: 4px !important;
-                vertical-align: middle !important;
-                object-fit: contain;
+                height: 38px;
+                width: auto;
+                max-width: 48px;
             }
-            .metric-label img.clickable-icon {
-                height: 40px !important;
-                width: 40px !important;
+            #airPanel .metric-label img {
+                height: 44px;
+                max-width: 54px;
             }
             .metric-value {
-                font-size: 16px;
-                padding: 2px 6px;
-                min-width: 100px;
-                width: 100px;
+                font-size: 14px;
+                padding: 4px 8px;
+                min-width: 85px;
+                max-width: 110px;
             }
             .warning-icon-small {
                 width: 22px !important;
@@ -791,8 +832,14 @@
 
     <!-- Panel switcher for mobile -->
     <div class="panel-switcher" id="panelSwitcher" style="display:none;">
-        <button id="weatherBtn" class="active" onclick="showPanel('weather')">Weather</button>
-        <button id="airBtn" onclick="showPanel('air')">Air Quality</button>
+        <button id="weatherBtn" class="active" onclick="showPanel('weather')">
+            <img id="weatherIcon" src="" alt="" style="height:24px;vertical-align:middle;margin-right:6px;display:none;">
+            <span>Weather</span>
+        </button>
+        <button id="airBtn" onclick="showPanel('air')">
+            <span>Air Quality</span>
+            <span id="aqhiBadge" class="aqhi-badge" onclick="event.stopPropagation(); openAQHIModal();" style="display:none;"></span>
+        </button>
     </div>
 
     <div class="main-content">
@@ -803,27 +850,27 @@
             </div>
             <div class="metrics-container">
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/temp.png" alt="Temperature" class="clickable-icon" onclick="openMetricModal('temperature')" style="height:24px;vertical-align:middle;margin-right:6px;">Temperature</span>
+                    <span class="metric-label"><img src="assets/temp.png" alt="Temperature" class="clickable-icon" onclick="openMetricModal('temperature')">Temperature</span>
                     <span class="metric-value" id="tempValue">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/hum.png" alt="Humidity" class="clickable-icon" onclick="openMetricModal('humidity')" style="height:24px;vertical-align:middle;margin-right:6px;">Humidity</span>
+                    <span class="metric-label"><img src="assets/hum.png" alt="Humidity" class="clickable-icon" onclick="openMetricModal('humidity')">Humidity</span>
                     <span class="metric-value" id="humidityValue">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/UV.png" alt="UV" class="clickable-icon" onclick="openMetricModal('uv')" style="height:24px;vertical-align:middle;margin-right:6px;">UV Index</span>
+                    <span class="metric-label"><img src="assets/UV.png" alt="UV" class="clickable-icon" onclick="openMetricModal('uv')">UV Index</span>
                     <span class="metric-value" id="uvValue">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/rain.png" alt="Rain" class="clickable-icon" onclick="openMetricModal('rain')" style="height:24px;vertical-align:middle;margin-right:6px;">Rain</span>
+                    <span class="metric-label"><img src="assets/rain.png" alt="Rain" class="clickable-icon" onclick="openMetricModal('rain')">Rain</span>
                     <span class="metric-value" id="rainValue">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/wind.png" alt="Wind" class="clickable-icon" onclick="openMetricModal('wind')" style="height:24px;vertical-align:middle;margin-right:6px;">Wind</span>
+                    <span class="metric-label"><img src="assets/wind.png" alt="Wind" class="clickable-icon" onclick="openMetricModal('wind')">Wind</span>
                     <span class="metric-value" id="windValue">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/visibility.png" alt="Visibility" class="clickable-icon" onclick="openMetricModal('visibility')" style="height:24px;vertical-align:middle;margin-right:6px;">Visibility</span>
+                    <span class="metric-label"><img src="assets/visibility.png" alt="Visibility" class="clickable-icon" onclick="openMetricModal('visibility')">Visibility</span>
                     <span class="metric-value" id="visibilityValue">—</span>
                 </div>
             </div>
@@ -833,27 +880,27 @@
             <h2>Air Quality (µg/m³)</h2>
             <div class="metrics-container">
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/no2.png" alt="NO2" class="clickable-icon" onclick="openMetricModal('no2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-label"><img src="assets/no2.png" alt="NO2" class="clickable-icon" onclick="openMetricModal('no2')"></span>
                     <span class="metric-value" id="no2Value">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/03.png" alt="O3" class="clickable-icon" onclick="openMetricModal('o3')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-label"><img src="assets/03.png" alt="O3" class="clickable-icon" onclick="openMetricModal('o3')"></span>
                     <span class="metric-value" id="o3Value">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/so2.png" alt="SO2" class="clickable-icon" onclick="openMetricModal('so2')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-label"><img src="assets/so2.png" alt="SO2" class="clickable-icon" onclick="openMetricModal('so2')"></span>
                     <span class="metric-value" id="so2Value">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/co.png" alt="CO" class="clickable-icon" onclick="openMetricModal('co')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-label"><img src="assets/co.png" alt="CO" class="clickable-icon" onclick="openMetricModal('co')"></span>
                     <span class="metric-value" id="coValue">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/pm10.png" alt="PM10" class="clickable-icon" onclick="openMetricModal('pm10')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-label"><img src="assets/pm10.png" alt="PM10" class="clickable-icon" onclick="openMetricModal('pm10')"></span>
                     <span class="metric-value" id="pm10Value">—</span>
                 </div>
                 <div class="metric">
-                    <span class="metric-label"><img src="assets/pm25.png" alt="PM2.5" class="clickable-icon" onclick="openMetricModal('pm25')" style="height:48px;vertical-align:middle;margin-right:6px;"></span>
+                    <span class="metric-label"><img src="assets/pm25.png" alt="PM2.5" class="clickable-icon" onclick="openMetricModal('pm25')"></span>
                     <span class="metric-value" id="pm25Value">—</span>
                 </div>
             </div>
@@ -1052,6 +1099,84 @@
                 console.error('Metric modal error:', err);
                 modalBody.innerHTML = '<div class="error-message">Unable to load metric details.</div>';
             }
+        }
+
+        function openAQHIModal() {
+            const modal = document.getElementById('metricModal');
+            const modalBody = document.getElementById('metric-modal-body');
+            modal.style.display = 'flex';
+            modalBody.innerHTML = generateAQHIInfo();
+        }
+
+        function generateAQHIInfo() {
+            return `
+                <h2 style="color:#667eea; margin-bottom:16px;">🌫️ Air Quality Health Index</h2>
+                <div class="metric-description">
+                    <p>The Air Quality Health Index (AQHI) is Hong Kong's air quality reporting system. It consolidates data from multiple pollutants (NO₂, O₃, SO₂, PM₁₀, PM₂.₅) into a single index representing short-term health risks.</p>
+                </div>
+
+                <details open style="margin:20px 0; cursor:pointer;">
+                    <summary style="font-weight:600; color:#667eea; font-size:15px; padding:12px; background:#f3f4f6; border-radius:8px; user-select:none;">
+                        📊 AQHI Grading Scale & Health Advisories
+                    </summary>
+                    <div style="margin-top:16px; padding:12px;">
+                        <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+                            <span style="display:inline-block; padding:6px 12px; border-radius:6px; background:#00e676; color:white; font-size:12px; font-weight:600;">1-3 Low</span>
+                            <span style="display:inline-block; padding:6px 12px; border-radius:6px; background:#ffea00; color:#111827; font-size:12px; font-weight:600;">4-6 Moderate</span>
+                            <span style="display:inline-block; padding:6px 12px; border-radius:6px; background:#ff6d00; color:white; font-size:12px; font-weight:600;">7 High</span>
+                            <span style="display:inline-block; padding:6px 12px; border-radius:6px; background:#ff1744; color:white; font-size:12px; font-weight:600;">8-10 Very High</span>
+                            <span style="display:inline-block; padding:6px 12px; border-radius:6px; background:#d500f9; color:white; font-size:12px; font-weight:600;">10+ Serious</span>
+                        </div>
+
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead>
+                                <tr style="background:#f9fafb; font-weight:600; color:#374151;">
+                                    <th style="padding:10px; text-align:left; border-bottom:2px solid #e5e7eb;">Level</th>
+                                    <th style="padding:10px; text-align:center; border-bottom:2px solid #e5e7eb;">Range</th>
+                                    <th style="padding:10px; text-align:left; border-bottom:2px solid #e5e7eb;">Health Advisory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#00e676; margin-right:6px;"></span>Low</td>
+                                    <td style="padding:10px; text-align:center; border-bottom:1px solid #e5e7eb;">1–3</td>
+                                    <td style="padding:10px; color:#4b5563; border-bottom:1px solid #e5e7eb;">No health risk. Normal activities can continue.</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#ffea00; margin-right:6px;"></span>Moderate</td>
+                                    <td style="padding:10px; text-align:center; border-bottom:1px solid #e5e7eb;">4–6</td>
+                                    <td style="padding:10px; color:#4b5563; border-bottom:1px solid #e5e7eb;">Sensitive groups (children, elderly, heart/lung conditions) consider reducing prolonged outdoor exertion.</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#ff6d00; margin-right:6px;"></span>High</td>
+                                    <td style="padding:10px; text-align:center; border-bottom:1px solid #e5e7eb;">7</td>
+                                    <td style="padding:10px; color:#4b5563; border-bottom:1px solid #e5e7eb;">Sensitive groups reduce outdoor exertion. General public limit prolonged strenuous activities.</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#ff1744; margin-right:6px;"></span>Very High</td>
+                                    <td style="padding:10px; text-align:center; border-bottom:1px solid #e5e7eb;">8–10</td>
+                                    <td style="padding:10px; color:#4b5563; border-bottom:1px solid #e5e7eb;">Sensitive groups avoid outdoor exertion. General public reduce outdoor activities.</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#d500f9; margin-right:6px;"></span>Serious</td>
+                                    <td style="padding:10px; text-align:center;">10+</td>
+                                    <td style="padding:10px; color:#4b5563;">Everyone minimize outdoor exertion. Move activities indoors or reschedule.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+
+                <div style="margin-top:20px; padding:16px; background:#f0f9ff; border-left:4px solid #0ea5e9; border-radius:6px;">
+                    <p style="margin:0; font-size:13px; color:#0c4a6e;">
+                        <strong>💡 Note:</strong> The AQHI shown in the dashboard header represents the Hong Kong-wide average across all monitoring stations. Individual station values may vary.
+                    </p>
+                </div>
+
+                <div style="margin-top:16px; font-size:12px; color:#6b7280;">
+                    <p style="margin:0;">📚 Data source: <a href="https://www.aqhi.gov.hk" target="_blank" style="color:#667eea;">Hong Kong Environmental Protection Department (EPD)</a></p>
+                </div>
+            `;
         }
 
         async function loadMetricDetails(metricType) {
@@ -1912,6 +2037,16 @@
                             const wind = weatherData.wind || weatherData.wind?.data?.[0] || null;
                             const visibility = weatherData.visibility?.data?.[0] || weatherData.visibility || null;
 
+                            // Update weather icon in panel switcher button
+                            const weatherIconEl = document.getElementById('weatherIcon');
+                            if (weatherData.icon && Array.isArray(weatherData.icon) && weatherData.icon.length > 0) {
+                                const iconCode = weatherData.icon[0];
+                                weatherIconEl.src = `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${iconCode}.png`;
+                                weatherIconEl.style.display = 'inline';
+                            } else {
+                                weatherIconEl.style.display = 'none';
+                            }
+
                             // Temperature with color coding (bands: ≤0, 1–10, 11–16, 17–23, 24–29, 30–32, ≥33)
                             // Added heat stress pre-red band to distinguish hot vs very hot
                             tempValueEl.textContent = (temp?.value != null) ? `${temp.value}°C` : '—';
@@ -2050,9 +2185,48 @@
                         }
                     }
 
+                    // Get AQHI color based on value
+                    function getAQHIColor(aqhi) {
+                        if (aqhi <= 3) return '#00e676'; // Low - green
+                        if (aqhi <= 6) return '#ffea00'; // Moderate - yellow
+                        if (aqhi <= 7) return '#ff6d00'; // High - orange
+                        if (aqhi <= 10) return '#ff1744'; // Very High - red
+                        return '#d500f9'; // Serious - purple
+                    }
+
+                    // Get text color for AQHI badge (dark text for yellow)
+                    function getAQHITextColor(aqhi) {
+                        if (aqhi >= 4 && aqhi <= 6) return '#111827'; // Dark text for yellow
+                        return '#ffffff'; // White text for all others
+                    }
+
+                    // Update AQHI badge in Air Quality button
+                    async function updateAQHIBadge() {
+                        try {
+                            const res = await fetch(aqhiUrl);
+                            if (!res.ok) throw new Error(`AQHI HTTP ${res.status}`);
+                            const data = await res.json();
+                            
+                            // Calculate average AQHI across all stations
+                            const aqhiValues = data.map(s => s.aqhi).filter(v => v != null && !isNaN(v));
+                            if (aqhiValues.length > 0) {
+                                const avgAQHI = Math.round(aqhiValues.reduce((sum, v) => sum + v, 0) / aqhiValues.length);
+                                const badge = document.getElementById('aqhiBadge');
+                                badge.textContent = avgAQHI;
+                                badge.style.backgroundColor = getAQHIColor(avgAQHI);
+                                badge.style.color = getAQHITextColor(avgAQHI);
+                                badge.style.display = 'inline-block';
+                                badge.title = `Hong Kong Average AQHI: ${avgAQHI} (Click for info)`;
+                            }
+                        } catch (e) {
+                            console.warn('Failed to update AQHI badge', e);
+                        }
+                    }
+
                     // init
                     loadStations();
                     checkTodayHoliday();
+                    updateAQHIBadge();
                 })();
     </script>
     
