@@ -638,7 +638,7 @@
                 height: 42px !important;
             }
             .metric-value {
-                font-size: 14px;
+                font-size: 16px;
                 padding: 6px 12px;
                 min-width: 100px;
                 width: 100px;
@@ -652,9 +652,28 @@
             }
             .header {
                 padding: 10px 15px;
+                flex-wrap: nowrap;
             }
             .header h1 {
                 font-size: 18px;
+            }
+            .header-buttons {
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                white-space: nowrap;
+            }
+            .header-buttons label {
+                display: none; /* Hide "Station:" label on mobile */
+            }
+            .header-buttons select {
+                min-width: 120px !important;
+                font-size: 12px;
+                padding: 6px 10px !important;
+            }
+            .header-buttons button {
+                padding: 6px 12px !important;
+                margin-left: 6px !important;
             }
             .main-content {
                 grid-template-columns: 1fr !important;
@@ -695,10 +714,10 @@
                 width: 40px !important;
             }
             .metric-value {
-                font-size: 12px;
+                font-size: 16px;
                 padding: 2px 6px;
-                min-width: 70px;
-                width: 70px;
+                min-width: 100px;
+                width: 100px;
             }
             .warning-icon-small {
                 width: 22px !important;
@@ -765,7 +784,7 @@
         <div class="header-buttons">
             <label for="stationSelector" style="color: #fff; font-size: 13px; font-weight: 600; margin-right: 8px;">Station:</label>
             <select id="stationSelector" style="padding: 8px 16px; border-radius: 5px; border: 1px solid #ccc; margin-right: 10px; min-width: 180px;"><option>Loading stations...</option></select>
-            <button onclick="startTour()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.25)'">❓ Help</button>
+            <button onclick="startTour()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.25)'">?</button>
         </div>
     </div>
     <div id="sd-status" style="display:none; background: rgba(255,255,255,0.15); color:#fff; padding:6px 12px; text-align:center; font-size:12px;"></div>
