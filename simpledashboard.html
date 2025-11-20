@@ -642,6 +642,13 @@
             }
         }
 
+        /* Hide mobile panel switcher on desktop/tablet */
+        @media (min-width: 701px) {
+            .panel-switcher {
+                display: none !important;
+            }
+        }
+
         /* Tablet view (2 columns) */
         @media (min-width: 701px) and (max-width: 1024px) {
             body {
@@ -813,6 +820,12 @@
             }
             .panel { display: none; }
             .panel.active { display: flex; flex-direction: column; }
+            
+            /* Hide desktop weather icon and AQHI badge on mobile */
+            #weatherIconDesktop,
+            #aqhiBadgeDesktop {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -845,7 +858,10 @@
     <div class="main-content">
         <div class="panel active" id="weatherPanel">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                <h2 style="margin: 0;">Weather</h2>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <img id="weatherIconDesktop" src="" alt="" style="height:32px;display:none;">
+                    <h2 style="margin: 0;">Weather</h2>
+                </div>
                 <div id="warningsContainer" style="display: flex; gap: 6px;"></div>
             </div>
             <div class="metrics-container">
@@ -877,7 +893,10 @@
         </div>
 
         <div class="panel" id="airPanel">
-            <h2>Air Quality (µg/m³)</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Air Quality (µg/m³)</h2>
+                <span id="aqhiBadgeDesktop" class="aqhi-badge" onclick="openAQHIModal();" style="display:none;"></span>
+            </div>
             <div class="metrics-container">
                 <div class="metric">
                     <span class="metric-label"><img src="assets/no2.png" alt="NO2" class="clickable-icon" onclick="openMetricModal('no2')"></span>
@@ -2037,14 +2056,19 @@
                             const wind = weatherData.wind || weatherData.wind?.data?.[0] || null;
                             const visibility = weatherData.visibility?.data?.[0] || weatherData.visibility || null;
 
-                            // Update weather icon in panel switcher button
+                            // Update weather icon in panel switcher button (mobile) and desktop header
                             const weatherIconEl = document.getElementById('weatherIcon');
+                            const weatherIconDesktopEl = document.getElementById('weatherIconDesktop');
                             if (weatherData.icon && Array.isArray(weatherData.icon) && weatherData.icon.length > 0) {
                                 const iconCode = weatherData.icon[0];
-                                weatherIconEl.src = `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${iconCode}.png`;
+                                const iconUrl = `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${iconCode}.png`;
+                                weatherIconEl.src = iconUrl;
                                 weatherIconEl.style.display = 'inline';
+                                weatherIconDesktopEl.src = iconUrl;
+                                weatherIconDesktopEl.style.display = 'block';
                             } else {
                                 weatherIconEl.style.display = 'none';
+                                weatherIconDesktopEl.style.display = 'none';
                             }
 
                             // Temperature with color coding (bands: ≤0, 1–10, 11–16, 17–23, 24–29, 30–32, ≥33)
@@ -2211,12 +2235,22 @@
                             const aqhiValues = data.map(s => s.aqhi).filter(v => v != null && !isNaN(v));
                             if (aqhiValues.length > 0) {
                                 const avgAQHI = Math.round(aqhiValues.reduce((sum, v) => sum + v, 0) / aqhiValues.length);
+                                
+                                // Update mobile badge
                                 const badge = document.getElementById('aqhiBadge');
                                 badge.textContent = avgAQHI;
                                 badge.style.backgroundColor = getAQHIColor(avgAQHI);
                                 badge.style.color = getAQHITextColor(avgAQHI);
                                 badge.style.display = 'inline-block';
                                 badge.title = `Hong Kong Average AQHI: ${avgAQHI} (Click for info)`;
+                                
+                                // Update desktop badge
+                                const badgeDesktop = document.getElementById('aqhiBadgeDesktop');
+                                badgeDesktop.textContent = avgAQHI;
+                                badgeDesktop.style.backgroundColor = getAQHIColor(avgAQHI);
+                                badgeDesktop.style.color = getAQHITextColor(avgAQHI);
+                                badgeDesktop.style.display = 'inline-block';
+                                badgeDesktop.title = `Hong Kong Average AQHI: ${avgAQHI} (Click for info)`;
                             }
                         } catch (e) {
                             console.warn('Failed to update AQHI badge', e);
