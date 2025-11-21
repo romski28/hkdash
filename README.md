@@ -2,6 +2,19 @@
 
 A responsive, single-page dashboard that displays real-time air quality and weather data across Hong Kong districts. Built for clarity, transparency, and ease of use on any device.
 
+### Why This Dashboard?
+
+Most phone apps give you snapshots of weather or air quality in isolation.  
+This dashboard unifies **air quality, pollutants, weather, humidity, and UV index** into one clear view, tailored to Hong Kong districts.  
+
+- **Forecasting:** short‑term AQHI and pollutant trends help you plan your day.  
+- **Transparency:** every reading is timestamped and sourced, so you know exactly when and where data comes from.  
+- **Local relevance:** district‑level detail, not generic global feeds.  
+- **Device‑agnostic:** works on any browser, no installs or logins required.  
+- **Extendable:** can be personalised, extended, or connected to smart systems like AC, filters, and extractors.  
+
+It’s not “just another app” — it’s a tool for clarity, context, and control.
+
 ## 🌬️ What It Shows
 
 - AQHI (Air Quality Health Index) by district
@@ -31,7 +44,7 @@ A responsive, single-page dashboard that displays real-time air quality and weat
 
 ## 🧪 Try It Out
 
-Visit the live dashboard: [your-dashboard-link]
+Visit the live dashboard: https://romski28.github.io/hkdash/simpledashboard.html
 
 ## 🤝 Custom Versions Available
 
