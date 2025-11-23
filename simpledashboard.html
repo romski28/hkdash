@@ -1807,6 +1807,54 @@
                     const pm25ValueEl = document.getElementById('pm25Value');
                     const warningsContainer = document.getElementById('warningsContainer');
 
+                    // Robust fetch with retry logic for CORS reliability
+                    async function fetchWithRetry(url, options = {}, retries = 3) {
+                        for (let attempt = 0; attempt < retries; attempt++) {
+                            try {
+                                // Add cache-busting on retries to bypass edge cache issues
+                                const fetchUrl = attempt > 0 
+                                    ? url + (url.includes('?') ? '&' : '?') + `_retry=${attempt}&_ts=${Date.now()}`
+                                    : url;
+                                
+                                const response = await fetch(fetchUrl, {
+                                    ...options,
+                                    headers: {
+                                        ...options.headers,
+                                        // Ensure Origin header is sent for CORS
+                                        'Accept': options.headers?.Accept || 'application/json'
+                                    }
+                                });
+                                
+                                if (!response.ok) {
+                                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                                }
+                                
+                                // Log successful fetch with retry info if applicable
+                                if (attempt > 0) {
+                                    console.log(`[RETRY SUCCESS] ${url} succeeded on attempt ${attempt + 1}`);
+                                }
+                                
+                                return response;
+                                
+                            } catch (error) {
+                                const isLastAttempt = attempt === retries - 1;
+                                
+                                // Log the error
+                                console.warn(`[FETCH ATTEMPT ${attempt + 1}/${retries}] ${url} failed:`, error.message);
+                                
+                                // If this is the last attempt, throw the error
+                                if (isLastAttempt) {
+                                    console.error(`[FETCH FAILED] ${url} failed after ${retries} attempts`);
+                                    throw error;
+                                }
+                                
+                                // Wait before retrying (exponential backoff: 500ms, 1000ms, 2000ms...)
+                                const delay = 500 * Math.pow(2, attempt);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                            }
+                        }
+                    }
+
                     const stationWeatherMap = {
                         // Only 4 visibility stations: Central, Chek Lap Kok, Sai Wan Ho, Waglan Island
                         // Mapping generously based on geographic proximity
@@ -1844,9 +1892,8 @@
 
                                 async function loadStations(){
                         try{
-                            const res = await fetch(aqhiUrl);
-                                        if (!res.ok) throw new Error(`AQHI HTTP ${res.status}`);
-                                        const data = await res.json();
+                            const res = await fetchWithRetry(aqhiUrl);
+                            const data = await res.json();
                             // Populate selector
                             stationSelect.innerHTML = '';
                             data.forEach(s => {
@@ -2182,9 +2229,8 @@
 
                                 async function updatePollutants(stationName){
                         try{
-                            const res = await fetch(pollutantUrl);
-                                        if (!res.ok) throw new Error(`Pollutants HTTP ${res.status}`);
-                                        const xmlText = await res.text();
+                            const res = await fetchWithRetry(pollutantUrl);
+                            const xmlText = await res.text();
                             const parser = new DOMParser();
                             const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
                             const records = Array.from(xmlDoc.getElementsByTagName('PollutantConcentration'))
@@ -2286,8 +2332,7 @@
                     // Update AQHI badge in Air Quality button
                     async function updateAQHIBadge() {
                         try {
-                            const res = await fetch(aqhiUrl);
-                            if (!res.ok) throw new Error(`AQHI HTTP ${res.status}`);
+                            const res = await fetchWithRetry(aqhiUrl);
                             const data = await res.json();
                             
                             // Calculate average AQHI across all stations
@@ -2557,5 +2602,4 @@
 
     </script>
 </body>
-
 </html>
