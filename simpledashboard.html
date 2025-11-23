@@ -55,8 +55,9 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             padding: 20px;
-            padding-bottom: 70px; /* space for footer */
+            padding-bottom: 100px; /* space for footer - increased to prevent overlap */
             overflow: hidden;
+            min-height: 0; /* Allow flex shrinking */
         }
 
         .bottom-bar {
@@ -138,19 +139,21 @@
         .panel {
             background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%);
             border-radius: 15px;
-            padding: 20px;
+            padding: 18px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
+            overflow: hidden; /* Remove auto scrolling - content should fit */
             border: 1px solid rgba(255, 255, 255, 0.1);
-            height: 100%;
+            min-height: 0; /* Allow flex shrinking */
+            max-height: 100%; /* Don't exceed grid cell height */
         }
         
         .metrics-container {
             display: flex;
             flex-direction: column;
-            flex: 1;
+            gap: 0;
+            overflow: hidden; /* Prevent internal scrolling */
         }
 
         .panel h2 {
@@ -244,10 +247,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 0;
+            padding: 12px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            flex: 1;
-            min-height: 64px;
+            min-height: 60px; /* Slightly more compact to fit better */
+            flex-shrink: 0; /* Don't shrink below min-height */
         }
 
         .metric:last-child {
@@ -264,16 +267,16 @@
         }
 
         .metric-label img {
-            height: 52px;
+            height: 48px; /* Slightly smaller to fit better */
             width: auto;
-            max-width: 64px;
+            max-width: 60px;
             object-fit: contain;
         }
 
         /* Air Quality icons are larger since they have no text labels */
         #airPanel .metric-label img {
-            height: 62px;
-            max-width: 74px;
+            height: 56px; /* Slightly smaller to fit better */
+            max-width: 68px;
         }
 
         .metric-value {
@@ -662,8 +665,9 @@
             }
             .main-content {
                 padding: 10px;
-                padding-bottom: 90px;
+                padding-bottom: 120px; /* Increased for tablet landscape with nav bars */
                 gap: 10px;
+                max-height: calc(100dvh - 50px); /* Account for header */
             }
             .panel {
                 padding: 12px;
@@ -673,19 +677,20 @@
                 margin-bottom: 10px;
             }
             .metric {
-                padding: 10px 0;
-                min-height: 56px;
+                padding: 8px 0;
+                min-height: 52px; /* More compact for tablet landscape */
+                flex-shrink: 0;
             }
             .metric-label {
                 font-size: 13px;
             }
             .metric-label img {
-                height: 44px;
-                max-width: 56px;
+                height: 40px; /* Slightly smaller for tablet to fit better */
+                max-width: 52px;
             }
             #airPanel .metric-label img {
-                height: 52px;
-                max-width: 64px;
+                height: 46px; /* Slightly smaller for tablet */
+                max-width: 58px;
             }
             .metric-value {
                 font-size: 16px;
