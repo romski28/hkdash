@@ -140,18 +140,18 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
+            display: grid; /* Grid for header + metrics */
+            grid-template-rows: auto 1fr; /* header + metrics area */
             overflow: hidden; /* No scrolling within panels */
             border: 1px solid rgba(255, 255, 255, 0.1);
-            min-height: 0; /* Allow flex shrinking */
+            min-height: 0; /* Allow shrinking in parent grid */
         }
         
         .metrics-container {
-            display: flex;
-            flex-direction: column;
+            display: grid; /* six equal metric rows by default */
+            grid-template-rows: repeat(6, 1fr);
             gap: 0;
-            overflow: hidden;
+            min-height: 0;
         }
 
         .panel h2 {
@@ -247,9 +247,6 @@
             align-items: center;
             padding: 14px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            flex: 0 0 auto; /* Don't grow or shrink */
-            height: calc((100% - 60px) / 6); /* Divide space equally: 6 metrics, 60px for header */
-            min-height: 60px; /* Minimum for very small screens */
         }
 
         .metric:last-child {
@@ -675,8 +672,6 @@
             }
             .metric {
                 padding: 8px 0;
-                height: calc((100% - 50px) / 6); /* Equal division: 6 metrics, 50px for header */
-                min-height: 50px; /* Minimum for small tablets */
             }
             .metric-label {
                 font-size: 13px;
@@ -746,8 +741,6 @@
             }
             .metric {
                 padding: 6px 0;
-                height: calc((100% - 40px) / 6); /* Equal division: 6 metrics, 40px for header */
-                min-height: 45px; /* Minimum for small mobile screens */
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             }
             .metric-label {
@@ -884,6 +877,48 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Orientation-based sizing */
+        /* Landscape: divide panel into 7 equal rows (1 header + 6 metrics) */
+        @media (orientation: landscape) {
+            .panel {
+                grid-template-rows: repeat(7, 1fr);
+            }
+            .panel > :first-child {
+                grid-row: 1;
+                margin-bottom: 0 !important; /* ensure equal row height */
+                display: flex;
+                align-items: center;
+            }
+            .panel .metrics-container {
+                grid-row: 2 / span 6;
+                display: grid;
+                grid-template-rows: repeat(6, 1fr);
+                align-content: stretch;
+            }
+        }
+
+        /* Portrait: cap row heights to avoid 'leggy' rows */
+        :root { --row-max: 90px; }
+        @media (orientation: portrait) {
+            .panel { grid-template-rows: auto 1fr; }
+            .panel > :first-child { margin-bottom: 8px; }
+            .panel .metrics-container {
+                display: grid;
+                grid-template-rows: repeat(6, minmax(0, var(--row-max)));
+                align-content: start; /* keep rows at the top if there's extra space */
+            }
+        }
+        /* Tighter caps for smaller screens in portrait */
+        @media (max-width: 700px) and (orientation: portrait) {
+            :root { --row-max: 64px; }
+        }
+        @media (min-width: 701px) and (max-width: 1024px) and (orientation: portrait) {
+            :root { --row-max: 80px; }
+        }
+        @media (min-width: 1025px) and (orientation: portrait) {
+            :root { --row-max: 96px; }
+        }
+
     </style>
 </head>
 <body>
