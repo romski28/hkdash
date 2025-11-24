@@ -142,7 +142,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             display: grid; /* Grid for header + metrics */
             grid-template-rows: auto 1fr; /* header + metrics area */
-            overflow: hidden; /* No scrolling within panels */
+            overflow-y: auto; /* Enable vertical scrolling when content exceeds space */
             border: 1px solid rgba(255, 255, 255, 0.1);
             min-height: 0; /* Allow shrinking in parent grid */
         }
@@ -247,6 +247,7 @@
             align-items: center;
             padding: 14px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 60px; /* Ensure metrics are visible */
         }
 
         .metric:last-child {
@@ -264,14 +265,20 @@
 
         .metric-label img {
             height: 48px; /* Equal size for both panels */
-            width: auto;
-            max-width: 60px;
+            width: 48px; /* Fixed width to align all text */
             object-fit: contain;
         }
 
         #airPanel .metric-label img {
             height: 48px; /* Same as weather panel for equal row heights */
-            max-width: 60px;
+            width: 48px; /* Fixed width to align all text */
+        }
+        
+        /* Forecast icon in header - match metric icon width */
+        #forecastIcon {
+            width: 48px !important;
+            height: 48px !important;
+            object-fit: contain;
         }
 
         .metric-value {
@@ -325,66 +332,100 @@
         }
 
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
+            background: #f9fafb;
+            padding: 32px;
+            border-radius: 16px;
             max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
             width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         .close-btn {
-            position: absolute;
+            position: fixed;
             top: 15px;
             right: 15px;
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
-            color: #999;
+            color: white;
+            z-index: 10001;
+            background: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
         }
 
         .close-btn:hover {
-            color: #333;
+            background: #5568d3;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transform: scale(1.05);
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
         }
 
         .modal-section {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .modal-section h3 {
-            font-size: 18px;
-            color: #333;
-            margin-bottom: 12px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 6px;
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .traffic-item, .news-item {
-            padding: 12px;
-            margin-bottom: 10px;
-            background: #f9fafb;
-            border-radius: 8px;
-            border-left: 3px solid #667eea;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .traffic-item:hover, .news-item:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+            transform: translateY(-1px);
         }
 
         .traffic-item h4, .news-item h4 {
             font-size: 14px;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            line-height: 1.4;
         }
 
         .traffic-item p, .news-item p {
             font-size: 13px;
-            color: #4b5563;
-            margin: 4px 0;
+            color: #6b7280;
+            margin: 6px 0;
+            line-height: 1.5;
         }
 
         .news-item .news-time {
             font-size: 11px;
             color: #9ca3af;
-            font-style: italic;
+            margin-top: 8px;
+            display: inline-block;
         }
 
         .loading-spinner {
@@ -528,12 +569,35 @@
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: visible;
         }
 
         .aqhi-badge:hover {
             transform: scale(1.1);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
+
+        /* Glow / pulse effect */
+        .aqhi-badge::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.6), transparent 70%);
+            opacity: 0;
+            transform: scale(0.4);
+            pointer-events: none;
+        }
+        .aqhi-badge.pulse::before { animation: aqhiPulse 3.2s ease-in-out infinite; }
+        @keyframes aqhiPulse {
+            0% { opacity: 0.08; transform: scale(0.4); }
+            50% { opacity: 0.55; transform: scale(1.05); }
+            100% { opacity: 0; transform: scale(1.35); }
+        }
+        .aqhi-badge.low { box-shadow: 0 0 8px 2px rgba(0,255,170,0.35); }
+        .aqhi-badge.moderate { box-shadow: 0 0 12px 3px rgba(255,165,0,0.5); }
+        .aqhi-badge.severe { box-shadow: 0 0 14px 4px rgba(255,0,0,0.6); }
 
         .forecast-chart {
             margin: 20px 0;
@@ -678,11 +742,11 @@
             }
             .metric-label img {
                 height: 40px; /* Equal for both panels */
-                max-width: 50px;
+                width: 40px; /* Fixed width to align text */
             }
             #airPanel .metric-label img {
                 height: 40px; /* Same as weather panel */
-                max-width: 50px;
+                width: 40px; /* Fixed width to align text */
             }
             .metric-value {
                 font-size: 16px;
@@ -750,12 +814,11 @@
             }
             .metric-label img {
                 height: 36px; /* Equal for both panels */
-                width: auto;
-                max-width: 45px;
+                width: 36px; /* Fixed width to align text */
             }
             #airPanel .metric-label img {
                 height: 36px; /* Same as weather panel */
-                max-width: 45px;
+                width: 36px; /* Fixed width to align text */
             }
             .metric-value {
                 font-size: 14px;
@@ -919,6 +982,15 @@
             :root { --row-max: 96px; }
         }
 
+        .credits-link {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-right: 4px;
+        }
+        .credits-link:last-child {
+            margin-right: 0;
+        }
     </style>
 </head>
 <body>
@@ -955,9 +1027,11 @@
     <div class="main-content">
         <div class="panel active" id="weatherPanel">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <img id="weatherIconDesktop" src="" alt="" style="height:32px;display:none;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                     <h2 style="margin: 0;">Weather</h2>
+                    <div id="staticForecast" style="display: none; gap: 12px; margin-left: 8px;">
+                        <!-- 3-day forecast cards will be inserted here -->
+                    </div>
                 </div>
                 <div id="warningsContainer" style="display: flex; gap: 6px;"></div>
             </div>
@@ -1062,6 +1136,32 @@
                     case 'events':
                         content = await loadEventsData();
                         break;
+                    case 'credits':
+                        content = `
+                            <h2>Data Sources & Credits</h2>
+                            <div class="modal-section" style="padding: 20px;">
+                                <div style="margin-bottom: 24px;">
+                                    <h3 style="color: #667eea; font-size: 16px; margin-bottom: 8px;">Hong Kong Observatory (HKO)</h3>
+                                    <p style="margin-bottom: 12px; line-height: 1.6;">Weather data, warnings, and forecasts.</p>
+                                    <a href='https://www.hko.gov.hk' target='_blank' style="display: inline-block; background: #667eea; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">Visit HKO →</a>
+                                </div>
+                                
+                                <div style="margin-bottom: 24px;">
+                                    <h3 style="color: #667eea; font-size: 16px; margin-bottom: 8px;">Environmental Protection Department (EPD)</h3>
+                                    <p style="margin-bottom: 12px; line-height: 1.6;">Air Quality Health Index (AQHI) and pollutant data.</p>
+                                    <a href='https://www.aqhi.gov.hk' target='_blank' style="display: inline-block; background: #667eea; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">Visit EPD →</a>
+                                </div>
+                                
+                                <div style="margin-bottom: 24px;">
+                                    <h3 style="color: #667eea; font-size: 16px; margin-bottom: 8px;">South China Morning Post (SCMP)</h3>
+                                    <p style="margin-bottom: 12px; line-height: 1.6;">News headlines and summaries.</p>
+                                    <a href='https://www.scmp.com' target='_blank' style="display: inline-block; background: #667eea; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">Visit SCMP →</a>
+                                </div>
+                                
+                                <p style='font-size: 11px; color: #9ca3af; margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; line-height: 1.5;'>All data © respective providers. This dashboard is for informational purposes only – please consult official sources for health and safety advisories.</p>
+                            </div>
+                        `;
+                        break;
                 }
                 modalBody.innerHTML = content;
             } catch (err) {
@@ -1106,16 +1206,16 @@
                     
                     return `
                         <div class="traffic-item">
-                            <p><strong>${engShort}</strong></p>
+                            <h4>${engShort}</h4>
                             ${hasMoreDetail ? `
                                 <div id="${itemId}-full" style="display:none; margin-top:8px;">
-                                    <p style="color:#6b7280;">${engText}</p>
+                                    <p>${engText}</p>
                                 </div>
-                                <button onclick="toggleTrafficDetail('${itemId}')" id="${itemId}-btn" style="background:none; border:none; color:#667eea; cursor:pointer; font-size:12px; padding:4px 0; text-decoration:underline;">
+                                <button onclick="toggleTrafficDetail('${itemId}')" id="${itemId}-btn" style="background:none; border:none; color:#667eea; cursor:pointer; font-size:12px; padding:4px 0; text-decoration:underline; font-weight:500;">
                                     Show more
                                 </button>
                             ` : ''}
-                            ${referenceDate ? `<p style="font-size:11px; color:#9ca3af; margin-top:4px;">📅 ${referenceDate.trim()}</p>` : ''}
+                            ${referenceDate ? `<p style="font-size:11px; color:#9ca3af; margin-top:8px;">${referenceDate.trim()}</p>` : ''}
                         </div>
                     `;
                 }).join('');
@@ -2200,19 +2300,16 @@
                             const wind = weatherData.wind || weatherData.wind?.data?.[0] || null;
                             const visibility = weatherData.visibility?.data?.[0] || weatherData.visibility || null;
 
-                            // Update weather icon in panel switcher button (mobile) and desktop header
+                            // Update weather icon in panel switcher button (mobile only)
+                            // Desktop uses forecast rotator which has its own icons
                             const weatherIconEl = document.getElementById('weatherIcon');
-                            const weatherIconDesktopEl = document.getElementById('weatherIconDesktop');
-                            if (weatherData.icon && Array.isArray(weatherData.icon) && weatherData.icon.length > 0) {
+                            if (weatherIconEl && weatherData.icon && Array.isArray(weatherData.icon) && weatherData.icon.length > 0) {
                                 const iconCode = weatherData.icon[0];
-                                const iconUrl = `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${iconCode}.png`;
+                                const iconUrl = `assets/hko/pic${iconCode}.png`;
                                 weatherIconEl.src = iconUrl;
                                 weatherIconEl.style.display = 'inline';
-                                weatherIconDesktopEl.src = iconUrl;
-                                weatherIconDesktopEl.style.display = 'block';
-                            } else {
+                            } else if (weatherIconEl) {
                                 weatherIconEl.style.display = 'none';
-                                weatherIconDesktopEl.style.display = 'none';
                             }
 
                             // Temperature with color coding (bands: ≤0, 1–10, 11–16, 17–23, 24–29, 30–32, ≥33)
@@ -2262,6 +2359,63 @@
                         } catch(e){
                             console.error('Weather fetch failed', e);
                             tempValueEl.textContent = humidityValueEl.textContent = uvValueEl.textContent = rainValueEl.textContent = windValueEl.textContent = visibilityValueEl.textContent = '—';
+                        }
+                    }
+
+                    // Forecast rotation for desktop weather panel header
+                    // Simple static 3-day forecast display
+                    async function initStaticForecast() {
+                        try {
+                            const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en');
+                            const data = await res.json();
+                            
+                            if (data.weatherForecast && data.weatherForecast.length >= 3) {
+                                const today = new Date();
+                                const nextDay = new Date(today);
+                                nextDay.setDate(nextDay.getDate() + 2);
+                                
+                                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                                
+                                const forecasts = [
+                                    {
+                                        icon: data.weatherForecast[0].ForecastIcon,
+                                        label: 'Today',
+                                        minTemp: data.weatherForecast[0].forecastMintemp?.value,
+                                        maxTemp: data.weatherForecast[0].forecastMaxtemp?.value
+                                    },
+                                    {
+                                        icon: data.weatherForecast[1].ForecastIcon,
+                                        label: 'Tomorrow',
+                                        minTemp: data.weatherForecast[1].forecastMintemp?.value,
+                                        maxTemp: data.weatherForecast[1].forecastMaxtemp?.value
+                                    },
+                                    {
+                                        icon: data.weatherForecast[2].ForecastIcon,
+                                        label: dayNames[nextDay.getDay()],
+                                        minTemp: data.weatherForecast[2].forecastMintemp?.value,
+                                        maxTemp: data.weatherForecast[2].forecastMaxtemp?.value
+                                    }
+                                ];
+                                
+                                const container = document.getElementById('staticForecast');
+                                container.style.display = 'flex';
+                                
+                                // Create three forecast cards
+                                forecasts.forEach(forecast => {
+                                    const card = document.createElement('div');
+                                    card.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 8px; min-width: 70px;';
+                                    
+                                    card.innerHTML = `
+                                        <img src="assets/hko/pic${forecast.icon}.png" alt="${forecast.label}" style="width: 32px; height: 32px; object-fit: contain;">
+                                        <span style="font-size: 10px; color: #ffffff; font-weight: 700; white-space: nowrap;">${forecast.minTemp}° - ${forecast.maxTemp}°</span>
+                                        <span style="font-size: 8px; color: #d1d5db; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${forecast.label}</span>
+                                    `;
+                                    
+                                    container.appendChild(card);
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Forecast display failed', e);
                         }
                     }
 
@@ -2393,6 +2547,15 @@
                                 badgeDesktop.style.color = getAQHITextColor(avgAQHI);
                                 badgeDesktop.style.display = 'inline-block';
                                 badgeDesktop.title = `Hong Kong Average AQHI: ${avgAQHI} (Click for info)`;
+                                // apply glow severity
+                                badgeDesktop.classList.remove('low','moderate','severe','pulse');
+                                if (avgAQHI <= 3) {
+                                    badgeDesktop.classList.add('low');
+                                } else if (avgAQHI <= 7) {
+                                    badgeDesktop.classList.add('moderate','pulse');
+                                } else {
+                                    badgeDesktop.classList.add('severe','pulse');
+                                }
                             }
                         } catch (e) {
                             console.warn('Failed to update AQHI badge', e);
@@ -2403,6 +2566,7 @@
                     loadStations();
                     checkTodayHoliday();
                     updateAQHIBadge();
+                    initStaticForecast();
                 })();
     </script>
     
@@ -2411,8 +2575,7 @@
         <div class="footer-left">
             <img src="assets/connected-spaces-logo.png" alt="Connected Spaces" style="height: 36px;" />
             <div class="footer-citations">
-                <div>Data sources: <a href="https://www.hko.gov.hk" target="_blank">Hong Kong Observatory (HKO)</a></div>
-                <div><a href="https://www.aqhi.gov.hk" target="_blank">Hong Kong Environmental Protection Department (EPD)</a></div>
+                <div>Data: <span class="credits-link" onclick="openModal('credits')">HKO</span>, <span class="credits-link" onclick="openModal('credits')">EPD</span>, <span class="credits-link" onclick="openModal('credits')">SCMP</span></div>
             </div>
         </div>
         <div class="footer-buttons">
@@ -2616,21 +2779,28 @@
         const minDisplayTime = 3000; // 3 seconds minimum
         const startTime = Date.now();
 
-        // Hide loading screen after minimum time AND page is fully loaded
         function hideLoadingScreen() {
+            if (!loadingScreen) return;
             const elapsedTime = Date.now() - startTime;
             const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
-            
             setTimeout(() => {
                 loadingScreen.classList.add('fade-out');
-                // Remove from DOM after fade animation completes
                 setTimeout(() => {
                     loadingScreen.style.display = 'none';
                 }, 500);
             }, remainingTime);
         }
 
-        // Wait for page to be fully loaded
+        // Failsafe: forcibly hide splash after 6 seconds
+        setTimeout(() => {
+            if (loadingScreen && loadingScreen.style.display !== 'none') {
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+        }, 6000);
+
         if (document.readyState === 'complete') {
             hideLoadingScreen();
         } else {
