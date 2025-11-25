@@ -217,6 +217,14 @@
             object-fit: contain;
         }
 
+        /* Desktop weather warning icon size (match metric icons) */
+        .warning-icon-small {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            object-fit: contain;
+        }
+
         .warning-content {
             flex: 1;
             min-width: 0;
@@ -280,7 +288,6 @@
             height: 48px !important;
             object-fit: contain;
         }
-
         .metric-value {
             font-size: 18px;
             font-weight: 600;
@@ -366,6 +373,47 @@
             background: #5568d3;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
             transform: scale(1.05);
+        }
+
+        .refresh-progress-bar {
+            position: fixed;
+            bottom: 65px; /* Just above footer */
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .refresh-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 100%;
+            transition: width 1s linear;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 
+                        0 0 40px rgba(102, 126, 234, 0.4);
+            animation: progressPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { 
+                opacity: 1;
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 
+                            0 0 40px rgba(102, 126, 234, 0.4);
+            }
+            50% { 
+                opacity: 0.9;
+                box-shadow: 0 0 15px rgba(102, 126, 234, 0.6), 
+                            0 0 30px rgba(102, 126, 234, 0.3);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .refresh-progress-bar {
+                bottom: 60px; /* Adjust for smaller mobile footer */
+            }
         }
 
         .modal-content h2 {
@@ -557,20 +605,26 @@
         /* AQHI Badge */
         .aqhi-badge {
             display: inline-block;
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             border-radius: 6px;
             margin-left: 8px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 18px;
             text-align: center;
-            line-height: 32px;
+            line-height: 38px;
             color: white;
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             position: relative;
             overflow: visible;
+        }
+
+        /* Hide duplicated weather title on mobile (panel switcher already shows it) */
+        @media (max-width: 700px) {
+            #weatherPanel .weather-title,
+            #airPanel .air-title { display: none; }
         }
 
         .aqhi-badge:hover {
@@ -827,8 +881,9 @@
                 max-width: 110px;
             }
             .warning-icon-small {
-                width: 22px !important;
-                height: 22px !important;
+                /* Mobile size (match reduced metric icons) */
+                width: 36px !important;
+                height: 36px !important;
             }
             .panel-switcher {
                 padding: 0 8px;
@@ -1010,6 +1065,11 @@
             <button onclick="startTour()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.25)'">?</button>
         </div>
     </div>
+
+    <!-- Auto-refresh progress bar -->
+    <div class="refresh-progress-bar">
+        <div class="refresh-progress-fill" id="refreshProgressBar"></div>
+    </div>
     <div id="sd-status" style="display:none; background: rgba(255,255,255,0.15); color:#fff; padding:6px 12px; text-align:center; font-size:12px;"></div>
 
     <!-- Panel switcher for mobile -->
@@ -1028,7 +1088,10 @@
         <div class="panel active" id="weatherPanel">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <h2 style="margin: 0;">Weather</h2>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <img id="weatherIconDesktop" src="" alt="" style="height:28px;display:none;">
+                        <h2 class="weather-title" style="margin: 0;">Weather</h2>
+                    </div>
                     <div id="staticForecast" style="display: none; gap: 12px; margin-left: 8px;">
                         <!-- 3-day forecast cards will be inserted here -->
                     </div>
@@ -1065,7 +1128,7 @@
 
         <div class="panel" id="airPanel">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                <h2 style="margin: 0;">Air Quality (µg/m³)</h2>
+                <h2 class="air-title" style="margin: 0;">Air Quality (µg/m³)</h2>
                 <span id="aqhiBadgeDesktop" class="aqhi-badge" onclick="openAQHIModal();" style="display:none;"></span>
             </div>
             <div class="metrics-container">
@@ -2106,16 +2169,20 @@
                                              class="warning-icon-small ${warningClass}" 
                                              onclick="openWarningModal(${warningData})"
                                              title="${name}"
-                                             style="width: 32px; height: 32px; cursor: pointer; border-radius: 4px; transition: transform 0.2s;"
+                                             style="cursor: pointer; border-radius: 6px; transition: transform 0.2s;"
                                              onmouseover="this.style.transform='scale(1.1)'"
                                              onmouseout="this.style.transform='scale(1)'"
                                              onerror="this.style.display='none'" />
                                     `;
                                 }).join("");
                             }
+
+                            // Update forecast card visibility based on warning count
+                            updateForecastVisibility(activeWarnings.length);
                         } catch (err) {
                             console.error("Warnings fetch failed:", err);
                             warningsContainer.innerHTML = '<div class="no-warnings">Unable to load weather warnings</div>';
+                            updateForecastVisibility(0);
                         }
                     }
 
@@ -2300,16 +2367,27 @@
                             const wind = weatherData.wind || weatherData.wind?.data?.[0] || null;
                             const visibility = weatherData.visibility?.data?.[0] || weatherData.visibility || null;
 
-                            // Update weather icon in panel switcher button (mobile only)
-                            // Desktop uses forecast rotator which has its own icons
+                            // Update weather icon in panel switcher button (mobile) and desktop title
                             const weatherIconEl = document.getElementById('weatherIcon');
-                            if (weatherIconEl && weatherData.icon && Array.isArray(weatherData.icon) && weatherData.icon.length > 0) {
+                            const weatherIconDesktopEl = document.getElementById('weatherIconDesktop');
+                            if (weatherData.icon && Array.isArray(weatherData.icon) && weatherData.icon.length > 0) {
                                 const iconCode = weatherData.icon[0];
                                 const iconUrl = `assets/hko/pic${iconCode}.png`;
-                                weatherIconEl.src = iconUrl;
-                                weatherIconEl.style.display = 'inline';
-                            } else if (weatherIconEl) {
-                                weatherIconEl.style.display = 'none';
+                                
+                                // Update mobile icon
+                                if (weatherIconEl) {
+                                    weatherIconEl.src = iconUrl;
+                                    weatherIconEl.style.display = 'inline';
+                                }
+                                
+                                // Update desktop icon
+                                if (weatherIconDesktopEl) {
+                                    weatherIconDesktopEl.src = iconUrl;
+                                    weatherIconDesktopEl.style.display = 'inline-block';
+                                }
+                            } else {
+                                if (weatherIconEl) weatherIconEl.style.display = 'none';
+                                if (weatherIconDesktopEl) weatherIconDesktopEl.style.display = 'none';
                             }
 
                             // Temperature with color coding (bands: ≤0, 1–10, 11–16, 17–23, 24–29, 30–32, ≥33)
@@ -2364,6 +2442,9 @@
 
                     // Forecast rotation for desktop weather panel header
                     // Simple static 3-day forecast display
+                    // Store forecast cards for dynamic visibility control
+                    let forecastCards = [];
+
                     async function initStaticForecast() {
                         try {
                             const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en');
@@ -2399,10 +2480,13 @@
                                 
                                 const container = document.getElementById('staticForecast');
                                 container.style.display = 'flex';
+                                container.innerHTML = ''; // Clear existing cards
+                                forecastCards = []; // Reset array
                                 
                                 // Create three forecast cards
-                                forecasts.forEach(forecast => {
+                                forecasts.forEach((forecast, index) => {
                                     const card = document.createElement('div');
+                                    card.className = `forecast-card-${index}`;
                                     card.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 8px; min-width: 70px;';
                                     
                                     card.innerHTML = `
@@ -2412,10 +2496,24 @@
                                     `;
                                     
                                     container.appendChild(card);
+                                    forecastCards.push(card);
                                 });
                             }
                         } catch (e) {
                             console.error('Forecast display failed', e);
+                        }
+                    }
+
+                    // Update forecast card visibility based on warning count
+                    function updateForecastVisibility(warningCount) {
+                        if (forecastCards.length > 0) {
+                            const lastCard = forecastCards[forecastCards.length - 1];
+                            // Only hide the 3rd day forecast when there are 4 or more active warnings (crowded header scenario)
+                            if (warningCount >= 4) {
+                                lastCard.style.display = 'none';
+                            } else {
+                                lastCard.style.display = 'flex';
+                            }
                         }
                     }
 
@@ -2568,6 +2666,87 @@
                     updateAQHIBadge();
                     initStaticForecast();
                 })();
+
+        // Auto-refresh functionality
+        let refreshCountdown;
+        let secondsRemaining = 900; // 15 minutes in seconds
+        const REFRESH_DURATION = 900; // 15 minutes
+
+        function updateRefreshUI() {
+            const progressBar = document.getElementById('refreshProgressBar');
+            
+            if (progressBar) {
+                const percentage = (secondsRemaining / REFRESH_DURATION) * 100;
+                progressBar.style.width = `${percentage}%`;
+            }
+        }
+
+        function startRefreshCountdown() {
+            secondsRemaining = REFRESH_DURATION;
+            updateRefreshUI();
+            
+            if (refreshCountdown) {
+                clearInterval(refreshCountdown);
+            }
+            
+            refreshCountdown = setInterval(() => {
+                secondsRemaining--;
+                updateRefreshUI();
+                
+                if (secondsRemaining <= 0) {
+                    performRefresh();
+                }
+            }, 1000);
+        }
+
+        async function performRefresh() {
+            console.log('Auto-refreshing dashboard data...');
+            
+            const progressBar = document.getElementById('refreshProgressBar');
+            
+            // Flash green on refresh
+            if (progressBar) {
+                progressBar.style.background = 'linear-gradient(90deg, #22c55e 0%, #10b981 100%)';
+                progressBar.style.boxShadow = '0 0 15px rgba(34, 197, 94, 0.6)';
+            }
+            
+            try {
+                // Get current station
+                const stationSelect = document.getElementById('stationSelector');
+                const currentStation = stationSelect?.value;
+                
+                // Refresh all data
+                if (currentStation) {
+                    await updateForStation(currentStation);
+                }
+                await loadWarnings();
+                await checkTodayHoliday();
+                
+                console.log('Dashboard refreshed successfully');
+            } catch (error) {
+                console.error('Error refreshing dashboard:', error);
+                // Flash red on error
+                if (progressBar) {
+                    progressBar.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
+                }
+            }
+            
+            // Reset color after brief delay
+            setTimeout(() => {
+                if (progressBar) {
+                    progressBar.style.background = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+                    progressBar.style.boxShadow = '0 0 10px rgba(102, 126, 234, 0.5)';
+                }
+            }, 800);
+            
+            // Restart countdown
+            startRefreshCountdown();
+        }
+
+        // Start countdown when page loads
+        window.addEventListener('load', () => {
+            startRefreshCountdown();
+        });
     </script>
     
     <!-- Footer -->
